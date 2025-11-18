@@ -1,36 +1,36 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { ChevronLeft } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Textarea } from '@/components/ui/textarea'
-import { useRouter } from 'next/navigation'
+import { useState } from "react";
+import { ChevronLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Textarea } from "@/components/ui/textarea";
+import { useRouter } from "next/navigation";
 
 export default function SelfDiagnosisPage() {
-  const router = useRouter()
-  const [speechSlowness, setSpeechSlowness] = useState('모름')
-  const [pronunciationIssue, setPronunciationIssue] = useState('모름')
-  const [memoryChange, setMemoryChange] = useState('모름')
-  const [medicalHistory, setMedicalHistory] = useState('고혈압, 당뇨')
+  const router = useRouter();
+  const [speechSlowness, setSpeechSlowness] = useState("모름");
+  const [pronunciationIssue, setPronunciationIssue] = useState("모름");
+  const [memoryChange, setMemoryChange] = useState("모름");
+  const [medicalHistory, setMedicalHistory] = useState("고혈압, 당뇨");
 
   const handleSubmit = () => {
     // 임시 데이터 저장 로직
-    console.log('[v0] Self-diagnosis data:', {
+    console.log("[v0] Self-diagnosis data:", {
       speechSlowness,
       pronunciationIssue,
       memoryChange,
-      medicalHistory
-    })
-    router.push('/loading')
-  }
+      medicalHistory,
+    });
+    router.push("/loading");
+  };
 
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* 헤더 */}
-      <header className="sticky top-0 z-50 bg-background px-4 py-3 border-b border-border">
+      <header className="sticky top-0 z-50 bg-background px-4 py-3">
         <div className="flex items-center gap-3 max-w-md mx-auto">
           <Button
             variant="ghost"
@@ -46,25 +46,40 @@ export default function SelfDiagnosisPage() {
 
       {/* 메인 컨텐츠 */}
       <main className="max-w-md mx-auto px-4 pt-6 pb-6 space-y-6">
-        <Card className="bg-card border-0 p-5 rounded-md space-y-6">
+        <Card className="bg-card border-0 p-5 rounded-md shadow-none space-y-6">
           {/* 말이 느려졌나요? */}
           <div className="space-y-3">
             <Label className="text-base font-semibold text-foreground">
               말이 느려졌나요?
             </Label>
-            <RadioGroup value={speechSlowness} onValueChange={setSpeechSlowness}>
+            <RadioGroup
+              value={speechSlowness}
+              onValueChange={setSpeechSlowness}
+            >
               <div className="flex items-center gap-6">
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="예" id="speech-yes" />
-                  <Label htmlFor="speech-yes" className="text-sm cursor-pointer">예</Label>
+                  <Label
+                    htmlFor="speech-yes"
+                    className="text-sm cursor-pointer"
+                  >
+                    예
+                  </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="아니오" id="speech-no" />
-                  <Label htmlFor="speech-no" className="text-sm cursor-pointer">아니오</Label>
+                  <Label htmlFor="speech-no" className="text-sm cursor-pointer">
+                    아니오
+                  </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="모름" id="speech-unknown" />
-                  <Label htmlFor="speech-unknown" className="text-sm cursor-pointer">모름</Label>
+                  <Label
+                    htmlFor="speech-unknown"
+                    className="text-sm cursor-pointer"
+                  >
+                    모름
+                  </Label>
                 </div>
               </div>
             </RadioGroup>
@@ -75,19 +90,37 @@ export default function SelfDiagnosisPage() {
             <Label className="text-base font-semibold text-foreground">
               발음이 부정확해졌나요?
             </Label>
-            <RadioGroup value={pronunciationIssue} onValueChange={setPronunciationIssue}>
+            <RadioGroup
+              value={pronunciationIssue}
+              onValueChange={setPronunciationIssue}
+            >
               <div className="flex items-center gap-6">
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="예" id="pronunciation-yes" />
-                  <Label htmlFor="pronunciation-yes" className="text-sm cursor-pointer">예</Label>
+                  <Label
+                    htmlFor="pronunciation-yes"
+                    className="text-sm cursor-pointer"
+                  >
+                    예
+                  </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="아니오" id="pronunciation-no" />
-                  <Label htmlFor="pronunciation-no" className="text-sm cursor-pointer">아니오</Label>
+                  <Label
+                    htmlFor="pronunciation-no"
+                    className="text-sm cursor-pointer"
+                  >
+                    아니오
+                  </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="모름" id="pronunciation-unknown" />
-                  <Label htmlFor="pronunciation-unknown" className="text-sm cursor-pointer">모름</Label>
+                  <Label
+                    htmlFor="pronunciation-unknown"
+                    className="text-sm cursor-pointer"
+                  >
+                    모름
+                  </Label>
                 </div>
               </div>
             </RadioGroup>
@@ -102,15 +135,27 @@ export default function SelfDiagnosisPage() {
               <div className="flex items-center gap-6">
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="예" id="memory-yes" />
-                  <Label htmlFor="memory-yes" className="text-sm cursor-pointer">예</Label>
+                  <Label
+                    htmlFor="memory-yes"
+                    className="text-sm cursor-pointer"
+                  >
+                    예
+                  </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="아니오" id="memory-no" />
-                  <Label htmlFor="memory-no" className="text-sm cursor-pointer">아니오</Label>
+                  <Label htmlFor="memory-no" className="text-sm cursor-pointer">
+                    아니오
+                  </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="모름" id="memory-unknown" />
-                  <Label htmlFor="memory-unknown" className="text-sm cursor-pointer">모름</Label>
+                  <Label
+                    htmlFor="memory-unknown"
+                    className="text-sm cursor-pointer"
+                  >
+                    모름
+                  </Label>
                 </div>
               </div>
             </RadioGroup>
@@ -132,11 +177,12 @@ export default function SelfDiagnosisPage() {
 
         <Button
           onClick={handleSubmit}
-          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6 rounded-md text-base"
+          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 rounded-full shadow-none"
+          style={{ fontSize: "20px" }}
         >
           수정 완료
         </Button>
       </main>
     </div>
-  )
+  );
 }

@@ -101,7 +101,7 @@ export default function HomePage() {
                   className="text-sm"
                   style={{
                     color: "#979EA1",
-                    fontSize: "12px"
+                    fontSize: "12px",
                   }}
                 >
                   {daysWithoutCall}일간 통화하지 않았어요
