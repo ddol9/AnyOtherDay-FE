@@ -28,7 +28,9 @@ export default function LandingPage() {
   });
 
   // Step 4 설문 답변 (5개 질문, 각 0-4 값)
-  const [surveyAnswers, setSurveyAnswers] = useState<number[]>([-1, -1, -1, -1, -1]);
+  const [surveyAnswers, setSurveyAnswers] = useState<number[]>([
+    -1, -1, -1, -1, -1,
+  ]);
 
   // 자동 진행 (Step 1, 2는 3초 후 자동 진행)
   useEffect(() => {
@@ -51,13 +53,24 @@ export default function LandingPage() {
   }, [currentStep, router]);
 
   const handleFormChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData((prev) => {
+      const updated = { ...prev, [field]: value };
+      // 사용자 이름 저장
+      if (field === "name" && typeof window !== "undefined") {
+        localStorage.setItem("userName", value);
+      }
+      return updated;
+    });
   };
 
   const handleSurveyAnswerChange = (questionIndex: number, value: number) => {
     setSurveyAnswers((prev) => {
       const newAnswers = [...prev];
       newAnswers[questionIndex] = value;
+      // 설문 답변 저장
+      if (typeof window !== "undefined") {
+        localStorage.setItem("surveyAnswers", JSON.stringify(newAnswers));
+      }
       return newAnswers;
     });
   };
@@ -79,7 +92,11 @@ export default function LandingPage() {
     router.push("/"); // "나중에할래요" 클릭 시 메인 페이지로 이동
   };
 
-  const canProceedFromStep3 = formData.name && formData.gender && formData.birthDate && formData.relationship;
+  const canProceedFromStep3 =
+    formData.name &&
+    formData.gender &&
+    formData.birthDate &&
+    formData.relationship;
   const canProceedFromStep4 = surveyAnswers.every((answer) => answer !== -1);
 
   return (
@@ -128,10 +145,7 @@ export default function LandingPage() {
 
       {/* Step 5 */}
       {currentStep === 5 && (
-        <Step5
-          onUpload={() => setShowUploadModal(true)}
-          onSkip={handleSkip}
-        />
+        <Step5 onUpload={() => setShowUploadModal(true)} onSkip={handleSkip} />
       )}
 
       {/* Step 6 */}
