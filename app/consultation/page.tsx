@@ -101,12 +101,14 @@ export default function ConsultationPage() {
                     </div>
                   </div>
 
-                  <Button
-                    className="w-full bg-primary hover:bg-primary/90 text-white font-medium py-3 rounded-full shadow-none"
-                    style={{ fontSize: "20px" }}
-                  >
-                    전화 연결
-                  </Button>
+                  <div className="px-2">
+                    <Button
+                      className="w-full bg-primary hover:bg-primary/90 text-white font-medium py-3 rounded-full shadow-none"
+                      style={{ fontSize: "20px" }}
+                    >
+                      전화 연결
+                    </Button>
+                  </div>
                 </div>
               </Card>
             ))}

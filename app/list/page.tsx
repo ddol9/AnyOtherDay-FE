@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronRight, Phone, Heart } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import AppLayout from "@/components/layout/AppLayout";
+import Image from "next/image";
 
 export default function ListPage() {
   const router = useRouter();
@@ -102,16 +103,12 @@ export default function ListPage() {
             {/* Upload Section */}
             <div className="bg-white p-6 rounded-md shadow-none mb-6">
               <div className="flex justify-center mb-4">
-                <div className="relative">
-                  <Phone
-                    className="w-16 h-16 text-[#4291F2]"
-                    strokeWidth={1.5}
-                  />
-                  <Heart
-                    className="w-8 h-8 text-[#FFD86D] absolute -top-1 -right-2"
-                    fill="#FFD86D"
-                  />
-                </div>
+                <Image
+                  src="/icons/list/list-call.svg"
+                  alt="통화 아이콘"
+                  width={64}
+                  height={64}
+                />
               </div>
               <p className="text-center text-foreground mb-4">
                 옥순님과의 통화를 들려주세요
