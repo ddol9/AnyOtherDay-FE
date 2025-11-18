@@ -16,7 +16,7 @@ export default function ReportPage() {
   )
 
   return (
-    <AppLayout hasHeader={true} headerContent={headerContent}>
+    <AppLayout hasHeader={true} headerContent={headerContent} showNavigation={false}>
       <div className="px-4 py-4 max-w-md mx-auto w-full">
         {/* Main Result */}
         <div className="mb-6">
