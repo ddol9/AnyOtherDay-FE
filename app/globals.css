@@ -1,6 +1,6 @@
+@import url('https://cdn.jsdelivr.net/gh/spoqa/spoqa-han-sans@latest/Subset/SpoqaHanSansNeo.css');
 @import 'tailwindcss';
 @import 'tw-animate-css';
-@import url('https://cdn.jsdelivr.net/gh/spoqa/spoqa-han-sans@latest/Subset/SpoqaHanSansNeo.css');
 
 @custom-variant dark (&:is(.dark *));
 
