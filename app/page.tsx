@@ -1,65 +1,300 @@
-import Image from "next/image";
+'use client'
 
-export default function Home() {
+import { useState } from 'react'
+import { Home, List, MessageCircle, ClipboardList, User, Bell, Phone, AlertTriangle, ChevronRight, X, Upload } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+
+export default function HomePage() {
+  const [activeTab, setActiveTab] = useState('home')
+  const [showAlert, setShowAlert] = useState(true)
+  const [showUploadModal, setShowUploadModal] = useState(false)
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const router = useRouter()
+
+  // 예시 데이터
+  const userName = '육순'
+  const daysWithoutCall = 10
+  const recentStatus = '뇌졸중'
+  const alertCount = 3
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0])
+    }
+  }
+
+  const handleUpload = () => {
+    if (selectedFile) {
+      setShowUploadModal(false)
+      setShowConfirmModal(true)
+    }
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-screen bg-background pb-20">
+      {/* 헤더 */}
+      <header className="sticky top-0 z-50 bg-background px-4 py-3">
+        <div className="flex items-center justify-between max-w-md mx-auto">
+          <div className="flex items-center gap-2">
+            <span className="text-lg font-bold text-foreground">여느날</span>
+            <div className="w-3 h-3 rounded-full bg-accent"></div>
+          </div>
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" className="text-secondary">
+              <User className="h-5 w-5" />
+            </Button>
+            <Button variant="ghost" size="icon" className="text-secondary relative">
+              <Bell className="h-5 w-5" />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-destructive-foreground rounded-full"></span>
+            </Button>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+      </header>
+
+      {/* 메인 컨텐츠 */}
+      <main className="max-w-md mx-auto px-4 pt-4 pb-6 space-y-4">
+        {showAlert && (
+          <Card className="bg-card border-0 p-4 rounded-sm relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-2 right-2 text-muted-foreground h-6 w-6"
+              onClick={() => setShowAlert(false)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+            <div className="flex items-start gap-3">
+              <div className="bg-primary/10 rounded-full p-2.5">
+                <Phone className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-base text-foreground mb-1">
+                  오늘 {userName}님과 통화 어떠세요?
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {daysWithoutCall}일간 통화하지 않았어요
+                </p>
+              </div>
+            </div>
+          </Card>
+        )}
+
+        <Card className="bg-card border-0 p-5 rounded-sm">
+          <div className="text-center space-y-4">
+            <p className="text-sm text-muted-foreground">최근 결과</p>
+            <div className="space-y-2">
+              <h2 className="text-base leading-relaxed">
+                최근 <span className="font-bold text-primary">{userName}</span>님의 상태는
+              </h2>
+              <h2 className="text-xl font-bold text-primary leading-relaxed">
+                {recentStatus}이 의심돼요
+              </h2>
+            </div>
+
+            <div className="flex justify-center py-4">
+              <div className="relative">
+                <AlertTriangle className="h-24 w-24 text-destructive-foreground fill-destructive" />
+                <div className="absolute -bottom-2 -right-2 bg-white rounded-full p-1.5">
+                  <svg className="h-8 w-8 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" strokeWidth="2"/>
+                    <path d="M15 9l-6 6M9 9l6 6" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <Link href="/report">
+              <Card className="bg-destructive border-0 p-3.5 rounded-sm cursor-pointer hover:opacity-90 transition-opacity">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-destructive-foreground">
+                    주의 할 내용
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold text-destructive-foreground">
+                      {alertCount}건
+                    </span>
+                    <ChevronRight className="h-4 w-4 text-destructive-foreground" />
+                  </div>
+                </div>
+              </Card>
+            </Link>
+          </div>
+        </Card>
+
+        <Card className="bg-card border-0 p-5 rounded-sm">
+          <div className="text-center space-y-4">
+            <p className="text-sm text-muted-foreground">녹음된 확인</p>
+            <div className="space-y-1">
+              <p className="text-base leading-relaxed">
+                <span className="font-bold text-foreground">{userName}</span>님과의 통화로
+              </p>
+              <p className="text-base font-bold text-primary leading-relaxed">
+                위험도를 알아봐요
+              </p>
+            </div>
+            <Button 
+              onClick={() => setShowUploadModal(true)}
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6 rounded-sm text-base"
+            >
+              업로드하기
+            </Button>
+          </div>
+        </Card>
       </main>
+
+      {showUploadModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="bg-white w-full max-w-sm p-6 rounded-sm">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-foreground">
+                  음성 녹음 파일 업로드
+                </h2>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    setShowUploadModal(false)
+                    setSelectedFile(null)
+                  }}
+                  className="h-8 w-8"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="space-y-4">
+                <div className="border-2 border-dashed border-border rounded-sm p-8 text-center">
+                  <input
+                    type="file"
+                    accept="audio/*,.mp3,.wav,.m4a"
+                    onChange={handleFileChange}
+                    className="hidden"
+                    id="audio-upload"
+                  />
+                  <label
+                    htmlFor="audio-upload"
+                    className="cursor-pointer flex flex-col items-center gap-3"
+                  >
+                    <Upload className="h-12 w-12 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium text-foreground">
+                        파일을 선택하세요
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        MP3, WAV, M4A 형식 지원
+                      </p>
+                    </div>
+                  </label>
+                </div>
+
+                {selectedFile && (
+                  <div className="bg-muted p-3 rounded-sm">
+                    <p className="text-sm font-medium text-foreground truncate">
+                      {selectedFile.name}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                    </p>
+                  </div>
+                )}
+
+                <Button
+                  onClick={handleUpload}
+                  disabled={!selectedFile}
+                  className="w-full bg-primary hover:bg-primary/90 text-white font-medium py-3 rounded-sm disabled:opacity-50"
+                >
+                  업로드
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {showConfirmModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="bg-white w-full max-w-sm p-6 rounded-sm">
+            <div className="space-y-6">
+              <h2 className="text-lg font-semibold text-foreground text-center">
+                자가진단표를 수정할까요?
+              </h2>
+
+              <div className="flex gap-3">
+                <Button
+                  className="flex-1 bg-primary hover:bg-primary/90 text-white font-medium py-3 rounded-sm"
+                  onClick={() => {
+                    setShowConfirmModal(false)
+                    router.push('/self-diagnosis')
+                  }}
+                >
+                  수정할래요
+                </Button>
+                <Button
+                  variant="secondary"
+                  className="flex-1 bg-[#E0E0E0] hover:bg-[#D0D0D0] text-foreground font-medium py-3 rounded-sm"
+                  onClick={() => {
+                    setShowConfirmModal(false)
+                    router.push('/loading')
+                  }}
+                >
+                  결과 확인
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* 하단 네비게이션 바 */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-border">
+        <div className="max-w-md mx-auto flex items-center justify-around py-3 px-4">
+          <Link
+            href="/"
+            className={`flex flex-col items-center gap-1 ${
+              activeTab === 'home' ? 'text-primary' : 'text-secondary'
+            }`}
+            onClick={() => setActiveTab('home')}
+          >
+            <Home className="h-6 w-6" />
+            <span className="text-xs font-medium">홈</span>
+          </Link>
+          <Link
+            href="/list"
+            className={`flex flex-col items-center gap-1 ${
+              activeTab === 'list' ? 'text-primary' : 'text-secondary'
+            }`}
+            onClick={() => setActiveTab('list')}
+          >
+            <List className="h-6 w-6" />
+            <span className="text-xs font-medium">리스트</span>
+          </Link>
+          <Link
+            href="/consultation"
+            className={`flex flex-col items-center gap-1 ${
+              activeTab === 'consultation' ? 'text-primary' : 'text-secondary'
+            }`}
+            onClick={() => setActiveTab('consultation')}
+          >
+            <MessageCircle className="h-6 w-6" />
+            <span className="text-xs font-medium">상담</span>
+          </Link>
+          <Link
+            href="/test"
+            className={`flex flex-col items-center gap-1 ${
+              activeTab === 'test' ? 'text-primary' : 'text-secondary'
+            }`}
+            onClick={() => setActiveTab('test')}
+          >
+            <ClipboardList className="h-6 w-6" />
+            <span className="text-xs font-medium">테스트</span>
+          </Link>
+        </div>
+      </nav>
     </div>
-  );
+  )
 }
