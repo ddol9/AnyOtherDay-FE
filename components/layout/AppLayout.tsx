@@ -25,8 +25,8 @@ export default function AppLayout({
         </header>
       )}
 
-      {/* Main Content - scrollable area */}
-      <main className="flex-1 overflow-y-auto overflow-x-hidden">
+      {/* Main Content - scrollable area with bottom padding for navigation */}
+      <main className="flex-1 overflow-y-auto overflow-x-hidden pb-20">
         {children}
       </main>
 
