@@ -253,8 +253,8 @@ export default function HomePage() {
 
       {showConfirmModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <Card className="bg-white w-full max-w-sm p-6 rounded-md shadow-none">
-            <div className="space-y-6">
+          <Card className="bg-white w-full max-w-sm p-8 rounded-md shadow-none">
+            <div className="space-y-8">
               <h2 className="text-lg font-semibold text-foreground text-center">
                 자가진단표를 수정할까요?
               </h2>
@@ -271,8 +271,8 @@ export default function HomePage() {
                   수정할래요
                 </Button>
                 <Button
-                  variant="secondary"
-                  className="flex-1 bg-[#E0E0E0] hover:bg-[#D0D0D0] text-foreground font-medium py-3 rounded-md shadow-none"
+                  className="flex-1 bg-[#E0E0E0] hover:bg-[#D0D0D0] text-foreground font-medium py-3 rounded-full shadow-none"
+                  style={{ fontSize: "20px" }}
                   onClick={() => {
                     setShowConfirmModal(false);
                     router.push("/loading");
