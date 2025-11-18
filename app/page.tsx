@@ -1,58 +1,72 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { ChevronRight, X, Upload } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import AppLayout from '@/components/layout/AppLayout'
-import Image from 'next/image'
+import { useState } from "react";
+import { ChevronRight, X, Upload } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import AppLayout from "@/components/layout/AppLayout";
+import Image from "next/image";
 
 export default function HomePage() {
-  const [activeTab, setActiveTab] = useState('home')
-  const [showAlert, setShowAlert] = useState(true)
-  const [showUploadModal, setShowUploadModal] = useState(false)
-  const [showConfirmModal, setShowConfirmModal] = useState(false)
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const router = useRouter()
+  const [activeTab, setActiveTab] = useState("home");
+  const [showAlert, setShowAlert] = useState(true);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const router = useRouter();
 
   // 예시 데이터
-  const userName = '육순'
-  const daysWithoutCall = 10
-  const recentStatus = '뇌졸중'
-  const alertCount = 3
+  const userName = "육순";
+  const daysWithoutCall = 10;
+  const recentStatus = "뇌졸중";
+  const alertCount = 3;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0])
+      setSelectedFile(e.target.files[0]);
     }
-  }
+  };
 
   const handleUpload = () => {
     if (selectedFile) {
-      setShowUploadModal(false)
-      setShowConfirmModal(true)
+      setShowUploadModal(false);
+      setShowConfirmModal(true);
     }
-  }
+  };
 
   const headerContent = (
     <div className="flex items-center justify-between px-4 py-3 max-w-md mx-auto w-full">
       <div className="flex items-center gap-2">
-        <Image src="/icons/home/home-logo.svg" alt="어느날 로고" width={71} height={35} />
-        <div className="w-3 h-3 rounded-full bg-accent"></div>
+        <Image
+          src="/icons/home/home-logo.svg"
+          alt="어느날 로고"
+          width={71}
+          height={35}
+        />
       </div>
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" className="p-0">
-          <Image src="/icons/home/home-mypage.svg" alt="마이페이지" width={20} height={20} />
+          <Image
+            src="/icons/home/home-mypage.svg"
+            alt="마이페이지"
+            width={20}
+            height={20}
+          />
         </Button>
         <Button variant="ghost" size="icon" className="p-0 relative">
-          <Image src="/icons/home/home-alarm.svg" alt="알림" width={20} height={22} />
+          <Image
+            src="/icons/home/home-alarm.svg"
+            alt="알림"
+            width={20}
+            height={22}
+          />
           <span className="absolute top-1 right-1 w-2 h-2 bg-destructive-foreground rounded-full"></span>
         </Button>
       </div>
     </div>
-  )
+  );
 
   return (
     <AppLayout hasHeader={true} headerContent={headerContent}>
@@ -68,14 +82,25 @@ export default function HomePage() {
               <X className="h-4 w-4" />
             </Button>
             <div className="flex items-start gap-3">
-              <div className="flex-shrink-0">
-                <Image src="/icons/home/home-call.svg" alt="통화" width={24} height={32} />
+              <div className="shrink-0">
+                <Image
+                  src="/icons/home/home-call.svg"
+                  alt="통화"
+                  width={24}
+                  height={32}
+                />
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold text-base text-foreground mb-1">
+                <h3
+                  className="font-semibold text-base mb-1"
+                  style={{ color: "#4291F1", fontSize: "16px" }}
+                >
                   오늘 {userName}님과 통화 어떠세요?
                 </h3>
-                <p className="text-sm text-muted-foreground">
+                <p
+                  className="text-sm"
+                  style={{ color: "#979EA1", fontSize: "12px" }}
+                >
                   {daysWithoutCall}일간 통화하지 않았어요
                 </p>
               </div>
@@ -85,18 +110,30 @@ export default function HomePage() {
 
         <Card className="bg-card border-0 p-5 rounded">
           <div className="text-center space-y-4">
-            <p className="text-sm text-muted-foreground">최근 결과</p>
+            <p style={{ fontSize: "14px", color: "#979EA1" }}>최근 결과</p>
             <div className="space-y-2">
-              <h2 className="text-base leading-relaxed">
-                최근 <span className="font-bold text-primary">{userName}</span>님의 상태는
+              <h2
+                className="leading-relaxed"
+                style={{ fontSize: "20px", color: "#303233" }}
+              >
+                최근 {userName}님의 상태는
               </h2>
-              <h2 className="text-xl font-bold text-primary leading-relaxed">
-                {recentStatus}이 의심돼요
+              <h2
+                className="font-bold leading-relaxed"
+                style={{ fontSize: "28px" }}
+              >
+                <span className="text-primary">{recentStatus}</span>
+                <span style={{ color: "#303233" }}>이 의심돼요</span>
               </h2>
             </div>
 
             <div className="flex justify-center py-4">
-              <Image src="/icons/home/home-warning.svg" alt="경고" width={162} height={126} />
+              <Image
+                src="/icons/home/home-warning.svg"
+                alt="경고"
+                width={162}
+                height={126}
+              />
             </div>
 
             <Link href="/report">
@@ -119,16 +156,23 @@ export default function HomePage() {
 
         <Card className="bg-card border-0 p-5 rounded">
           <div className="text-center space-y-4">
-            <p className="text-sm text-muted-foreground">녹음된 확인</p>
+            <p style={{ fontSize: "14px", color: "#979EA1" }}>뇌질환 확인</p>
             <div className="space-y-1">
-              <p className="text-base leading-relaxed">
-                <span className="font-bold text-foreground">{userName}</span>님과의 통화로
+              <p
+                className="leading-relaxed"
+                style={{ fontSize: "20px", color: "#303233" }}
+              >
+                {userName}님과의 통화로
               </p>
-              <p className="text-base font-bold text-primary leading-relaxed">
-                위험도를 알아봐요
+              <p
+                className="font-bold leading-relaxed"
+                style={{ fontSize: "28px" }}
+              >
+                <span className="text-primary">위험도</span>
+                <span style={{ color: "#303233" }}>를 알아봐요</span>
               </p>
             </div>
-            <Button 
+            <Button
               onClick={() => setShowUploadModal(true)}
               className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6 rounded text-base"
             >
@@ -150,8 +194,8 @@ export default function HomePage() {
                   variant="ghost"
                   size="icon"
                   onClick={() => {
-                    setShowUploadModal(false)
-                    setSelectedFile(null)
+                    setShowUploadModal(false);
+                    setSelectedFile(null);
                   }}
                   className="h-8 w-8"
                 >
@@ -220,8 +264,8 @@ export default function HomePage() {
                 <Button
                   className="flex-1 bg-primary hover:bg-primary/90 text-white font-medium py-3 rounded"
                   onClick={() => {
-                    setShowConfirmModal(false)
-                    router.push('/self-diagnosis')
+                    setShowConfirmModal(false);
+                    router.push("/self-diagnosis");
                   }}
                 >
                   수정할래요
@@ -230,8 +274,8 @@ export default function HomePage() {
                   variant="secondary"
                   className="flex-1 bg-[#E0E0E0] hover:bg-[#D0D0D0] text-foreground font-medium py-3 rounded"
                   onClick={() => {
-                    setShowConfirmModal(false)
-                    router.push('/loading')
+                    setShowConfirmModal(false);
+                    router.push("/loading");
                   }}
                 >
                   결과 확인
@@ -242,5 +286,5 @@ export default function HomePage() {
         </div>
       )}
     </AppLayout>
-  )
+  );
 }
