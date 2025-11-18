@@ -8,7 +8,7 @@ interface Step5Props {
 
 export default function Step5({ onUpload, onSkip }: Step5Props) {
   return (
-    <div className="flex h-screen w-full flex-col items-center justify-between bg-white px-8 py-12">
+    <div className="flex h-screen w-full flex-col items-center justify-between bg-white px-4 py-12 max-w-md mx-auto">
       <div className="flex flex-1 items-center justify-center">
         <Image
           src="/icons/landing/landing-text15.svg"
@@ -19,19 +19,18 @@ export default function Step5({ onUpload, onSkip }: Step5Props) {
         />
       </div>
 
-      <div className="w-full max-w-md space-y-4 pb-8">
+      <div className="w-full space-y-2 pb-8">
         <Button
           onClick={onUpload}
-          className="w-full bg-primary py-6 text-base font-semibold text-primary-foreground hover:bg-primary/90"
+          className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full shadow-none text-base"
         >
           업로드하기
         </Button>
         <Button
           onClick={onSkip}
-          variant="secondary"
-          className="w-full bg-[#E0E0E0] py-6 text-base font-medium text-foreground hover:bg-[#D0D0D0]"
+          className="w-full h-12 bg-[#E0E0E0] hover:bg-[#D0D0D0] text-foreground font-medium rounded-full shadow-none text-base"
         >
-          나중에할래요
+          나중에 할래요
         </Button>
       </div>
     </div>

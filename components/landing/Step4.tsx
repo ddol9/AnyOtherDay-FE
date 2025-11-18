@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 interface Step4Props {
   userName: string;
   surveyAnswers: number[];
@@ -37,49 +39,51 @@ export default function Step4({
 }: Step4Props) {
   return (
     <div className="flex min-h-screen w-full flex-col bg-white px-4 py-12 max-w-md mx-auto">
-      <h1 className="mb-8 text-center text-2xl font-bold text-gray-800">
+      <h1 className="mb-8 text-center text-2xl font-bold text-[#9AA5BE]">
         요즘 {userName}님의 상태는 어떤가요?
       </h1>
 
       <div className="w-full space-y-8">
         {questions.map((question, questionIndex) => (
-          <div key={questionIndex} className="space-y-4">
-            <p className="text-base font-medium text-gray-700">
-              {questionIndex + 1}. {question}
-            </p>
+          <div key={questionIndex}>
+            {questionIndex > 0 && (
+              <div className="border-t border-gray-300 mb-8"></div>
+            )}
+            <div className="space-y-4">
+              <p className="text-base font-medium text-gray-700">
+                {questionIndex + 1}. {question}
+              </p>
 
-            <div className="flex items-center justify-between gap-2">
-              {[0, 1, 2, 3, 4].map((value) => {
-                const isSelected = surveyAnswers[questionIndex] === value;
-                const sizeClass = getButtonSize(value);
+              <div className="flex items-center justify-between gap-2">
+                {[0, 1, 2, 3, 4].map((value) => {
+                  const isSelected = surveyAnswers[questionIndex] === value;
+                  const sizeClass = getButtonSize(value);
 
-                return (
-                  <button
-                    key={value}
-                    onClick={() => onAnswerChange(questionIndex, value)}
-                    className="group relative flex flex-col items-center"
-                  >
-                    <div
-                      className={`relative ${sizeClass} rounded-full border-2 transition-all flex items-center justify-center ${
-                        isSelected
-                          ? "bg-[#FFD86D] border-[#FFD86D]"
-                          : "bg-transparent border-[#FFD86D]"
-                      }`}
+                  return (
+                    <button
+                      key={value}
+                      onClick={() => onAnswerChange(questionIndex, value)}
+                      className="group relative flex flex-col items-center"
                     >
-                      <span
-                        className={`text-xs font-medium ${
-                          isSelected ? "text-gray-800" : "text-[#FFD86D]"
-                        }`}
-                      >
-                        {value + 1}
+                      <div className={`relative ${sizeClass} transition-all`}>
+                        <Image
+                          src={
+                            isSelected
+                              ? "/icons/landing/landing-survey-fill.svg"
+                              : "/icons/landing/landing-survey.svg"
+                          }
+                          alt={scaleLabels[value]}
+                          fill
+                          className="object-contain opacity-100"
+                        />
+                      </div>
+                      <span className="mt-2 text-xs text-gray-600 text-center">
+                        {scaleLabels[value]}
                       </span>
-                    </div>
-                    <span className="mt-2 text-xs text-gray-600 text-center">
-                      {scaleLabels[value]}
-                    </span>
-                  </button>
-                );
-              })}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         ))}

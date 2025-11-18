@@ -171,8 +171,7 @@ export default function HomePage() {
             </div>
             <Button
               onClick={() => setShowUploadModal(true)}
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-5 rounded-full shadow-none"
-              style={{ marginTop: "20px", fontSize: "20px" }}
+              className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full shadow-none text-base mt-5"
             >
               업로드하기
             </Button>
@@ -240,8 +239,7 @@ export default function HomePage() {
                 <Button
                   onClick={handleUpload}
                   disabled={!selectedFile}
-                  className="w-full bg-primary hover:bg-primary/90 text-white font-medium py-3 rounded-full disabled:opacity-50 shadow-none"
-                  style={{ fontSize: "20px" }}
+                  className="w-full h-12 bg-primary hover:bg-primary/90 text-white font-medium rounded-full disabled:opacity-50 shadow-none text-base"
                 >
                   업로드
                 </Button>
@@ -261,8 +259,7 @@ export default function HomePage() {
 
               <div className="flex gap-3">
                 <Button
-                  className="flex-1 bg-primary hover:bg-primary/90 text-white font-medium py-3 rounded-full shadow-none"
-                  style={{ fontSize: "20px" }}
+                  className="flex-1 h-12 bg-primary hover:bg-primary/90 text-white font-medium rounded-full shadow-none text-base"
                   onClick={() => {
                     setShowConfirmModal(false);
                     router.push("/self-diagnosis");
@@ -271,8 +268,7 @@ export default function HomePage() {
                   수정할래요
                 </Button>
                 <Button
-                  className="flex-1 bg-[#E0E0E0] hover:bg-[#D0D0D0] text-foreground font-medium py-3 rounded-full shadow-none"
-                  style={{ fontSize: "20px" }}
+                  className="flex-1 h-12 bg-[#E0E0E0] hover:bg-[#D0D0D0] text-foreground font-medium rounded-full shadow-none text-base"
                   onClick={() => {
                     setShowConfirmModal(false);
                     router.push("/loading");

@@ -47,7 +47,7 @@ export default function ConsultationPage() {
       <div className="px-4 py-6 space-y-6 max-w-md mx-auto w-full">
         {/* 지도 영역 (임시) */}
         <Card className="bg-card border-0 rounded-md shadow-none overflow-hidden h-48">
-          <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+          <div className="w-full h-full bg-linear-to-br from-primary/20 to-primary/5 flex items-center justify-center">
             <div className="text-center">
               <MapPin className="h-12 w-12 text-primary mx-auto mb-2" />
               <p className="text-sm text-muted-foreground">지도 표시 영역</p>
@@ -77,7 +77,7 @@ export default function ConsultationPage() {
                         {hospital.department}
                       </p>
                     </div>
-                    <ChevronRight className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
+                    <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0 mt-1" />
                   </div>
 
                   <div className="space-y-2">
@@ -102,10 +102,7 @@ export default function ConsultationPage() {
                   </div>
 
                   <div className="px-2">
-                    <Button
-                      className="w-full bg-primary hover:bg-primary/90 text-white font-medium py-3 rounded-full shadow-none"
-                      style={{ fontSize: "20px" }}
-                    >
+                    <Button className="w-full h-12 bg-primary hover:bg-primary/90 text-white font-medium rounded-full shadow-none text-base">
                       전화 연결
                     </Button>
                   </div>

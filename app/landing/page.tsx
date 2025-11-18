@@ -28,9 +28,7 @@ export default function LandingPage() {
   });
 
   // Step 4 설문 답변 (5개 질문, 각 0-4 값)
-  const [surveyAnswers, setSurveyAnswers] = useState<number[]>([
-    -1, -1, -1, -1, -1,
-  ]);
+  const [surveyAnswers, setSurveyAnswers] = useState<number[]>([2, 2, 2, 2, 2]);
 
   // 자동 진행 (Step 1, 2는 3초 후 자동 진행)
   useEffect(() => {
@@ -42,11 +40,11 @@ export default function LandingPage() {
     }
   }, [currentStep]);
 
-  // Step 7 이후 자동으로 메인 페이지로 이동
+  // Step 7 이후 자동으로 리포트 페이지로 이동
   useEffect(() => {
     if (currentStep === 7) {
       const timer = setTimeout(() => {
-        router.push("/");
+        router.push("/report");
       }, 3000);
       return () => clearTimeout(timer);
     }
@@ -111,11 +109,11 @@ export default function LandingPage() {
       {currentStep === 3 && (
         <div className="relative h-screen">
           <Step3 formData={formData} onFormChange={handleFormChange} />
-          <div className="absolute bottom-8 left-0 right-0 px-8">
+          <div className="absolute bottom-8 left-0 right-0 px-4 max-w-md mx-auto">
             <Button
               onClick={() => setCurrentStep(4)}
               disabled={!canProceedFromStep3}
-              className="w-full bg-primary py-6 text-base font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+              className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full shadow-none disabled:opacity-50 text-base"
             >
               다음
             </Button>
@@ -131,11 +129,11 @@ export default function LandingPage() {
             surveyAnswers={surveyAnswers}
             onAnswerChange={handleSurveyAnswerChange}
           />
-          <div className="sticky bottom-0 bg-white px-8 py-4">
+          <div className="sticky bottom-0 bg-white px-4 py-4 max-w-md mx-auto">
             <Button
               onClick={() => setCurrentStep(5)}
               disabled={!canProceedFromStep4}
-              className="w-full bg-primary py-6 text-base font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+              className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full shadow-none disabled:opacity-50 text-base"
             >
               다음
             </Button>
@@ -149,27 +147,15 @@ export default function LandingPage() {
       )}
 
       {/* Step 6 */}
-      {currentStep === 6 && (
-        <div className="relative h-screen">
-          <Step6 />
-          <div className="absolute bottom-8 left-0 right-0 px-8">
-            <Button
-              onClick={() => setCurrentStep(7)}
-              className="w-full bg-primary py-6 text-base font-semibold text-primary-foreground hover:bg-primary/90"
-            >
-              다음
-            </Button>
-          </div>
-        </div>
-      )}
+      {currentStep === 6 && <Step6 onNext={() => setCurrentStep(7)} />}
 
       {/* Step 7 */}
       {currentStep === 7 && <Step7 />}
 
       {/* 업로드 모달 */}
       {showUploadModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <Card className="w-full max-w-sm rounded bg-white p-6">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="bg-white w-full max-w-sm p-6 rounded-md shadow-none">
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-foreground">
@@ -182,14 +168,14 @@ export default function LandingPage() {
                     setShowUploadModal(false);
                     setSelectedFile(null);
                   }}
-                  className="h-8 w-8"
+                  className="h-8 w-8 rounded-md shadow-none"
                 >
                   <X className="h-4 w-4" />
                 </Button>
               </div>
 
               <div className="space-y-4">
-                <div className="rounded border-2 border-dashed border-border p-8 text-center">
+                <div className="border-2 border-dashed border-border rounded-md p-8 text-center">
                   <input
                     type="file"
                     accept="audio/*,.mp3,.wav,.m4a"
@@ -199,14 +185,14 @@ export default function LandingPage() {
                   />
                   <label
                     htmlFor="audio-upload"
-                    className="flex cursor-pointer flex-col items-center gap-3"
+                    className="cursor-pointer flex flex-col items-center gap-3"
                   >
                     <Upload className="h-12 w-12 text-muted-foreground" />
                     <div>
                       <p className="text-sm font-medium text-foreground">
                         파일을 선택하세요
                       </p>
-                      <p className="mt-1 text-xs text-muted-foreground">
+                      <p className="text-xs text-muted-foreground mt-1">
                         MP3, WAV, M4A 형식 지원
                       </p>
                     </div>
@@ -214,11 +200,11 @@ export default function LandingPage() {
                 </div>
 
                 {selectedFile && (
-                  <div className="rounded bg-muted p-3">
-                    <p className="truncate text-sm font-medium text-foreground">
+                  <div className="bg-muted p-3 rounded-md">
+                    <p className="text-sm font-medium text-foreground truncate">
                       {selectedFile.name}
                     </p>
-                    <p className="mt-1 text-xs text-muted-foreground">
+                    <p className="text-xs text-muted-foreground mt-1">
                       {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
                     </p>
                   </div>
@@ -227,7 +213,7 @@ export default function LandingPage() {
                 <Button
                   onClick={handleUpload}
                   disabled={!selectedFile}
-                  className="w-full rounded bg-primary py-3 font-medium text-white hover:bg-primary/90 disabled:opacity-50"
+                  className="w-full h-12 bg-primary hover:bg-primary/90 text-white font-medium rounded-full disabled:opacity-50 shadow-none text-base"
                 >
                   업로드
                 </Button>

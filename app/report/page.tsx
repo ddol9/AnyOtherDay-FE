@@ -9,7 +9,10 @@ export default function ReportPage() {
 
   const headerContent = (
     <div className="px-4 py-3 max-w-md mx-auto">
-      <button onClick={() => router.push("/list")} className="text-foreground">
+      <button
+        onClick={() => router.push("/list")}
+        className="text-foreground text-base w-12 h-12 flex items-center justify-center"
+      >
         <ChevronLeft className="w-6 h-6" />
       </button>
     </div>
@@ -125,19 +128,18 @@ export default function ReportPage() {
           </div>
           <ul className="text-sm text-foreground space-y-2 mb-4 list-disc pl-5">
             <li>
-              뇌혈관이 막히거나 터져서 생기는 질환으로, 말이 꼬이거나 한쪽
-              이상에만는 증상이 특징적일 수 있습니다.
+              뇌혈관이 막히거나 터져서 생기는 질환으로, 말이 꼬이거나 한쪽이
+              약해지는 증상이 동반될 수 있습니다.
             </li>
-            <li>말소·고혈압, 당뇨, 심장질환이 있으면 위험이 높아집니다.</li>
+            <li>평소 고혈압, 당뇨, 심장질환이 있으면 위험이 높아집니다.</li>
             <li>
-              신경학적인 증상(어지럼증, 보행 장애 등)이 나타난 경험이 최근에
-              있어 농림드로 유의하십시오.
+              자가진단표의 혈압/어지럼 응답, 한쪽 팔이 마비됨 문항 체크 때문에
+              높음으로 평가되었습니다.
             </li>
           </ul>
           <button
             onClick={() => router.push("/consultation")}
-            className="w-full bg-[#4291F2] text-white py-3 rounded-full shadow-none font-medium"
-            style={{ fontSize: "20px" }}
+            className="w-full h-12 bg-[#4291F2] text-white rounded-full shadow-none font-medium text-base"
           >
             상담하러가기
           </button>
@@ -155,16 +157,16 @@ export default function ReportPage() {
           </div>
           <ul className="text-sm text-foreground space-y-2 list-disc pl-5">
             <li>
-              기억력이나 판단력이 떨어지면서 일상생활에 어려움이 생길 수 있는 뇌
-              질환입니다.
+              기억력이나 판단력이 떨어지면서 일상생활에 어려움이 생길 수 있는
+              퇴행성 뇌질환입니다.
             </li>
             <li>
-              초기에는 "같은말이 반복"이 있다면, "같은 말 반복"지침 인지 지체를
-              관찰해 나십시오.
+              초기에는 "말하려던 단어가 안 떠오름", "같은 말 반복"처럼 아주
+              가벼운 형태로 나타날 수 있습니다.
             </li>
             <li>
-              어떤 코드는 음성 분석에서 약한 위낙·자기고립으로서나 기저력 관련
-              문장열법 제도가 관찰될 결과입니다.
+              이번 결과는 음성 분석에서 약한 의심 + 자가진단표에서 기억력 관련
+              문항 일부 체크가 반영된 결과입니다.
             </li>
           </ul>
         </div>
@@ -182,11 +184,10 @@ export default function ReportPage() {
             다시 측정하기
           </h3>
           <p className="text-sm text-foreground text-center mb-4">
-            2주~1개월 내 음성으로 다시 입으로 → 경향성 확인
-            <br />
-            서비스 분석화가 이어진 리포트 기반 체계적으로 모든 관찰
+            2주~1개월 내 음성 다시 업로드 → 경향성 확인 서비스 &gt; 분석하기
+            &gt; 이전 리포트 기반 재측정 으로 연결
           </p>
-          <button className="w-full bg-[#4291F2] text-white py-3 rounded font-medium">
+          <button className="w-full h-12 bg-[#4291F2] text-white rounded-full shadow-none font-medium text-base">
             2주 뒤 알림 신청
           </button>
         </div>
@@ -197,11 +198,11 @@ export default function ReportPage() {
             추가 테스트
           </h3>
           <p className="text-sm text-foreground text-center mb-4">
-            서대그리카(CDI)
+            시계그리기(CDT)
             <br />
-            간단한 자가기저테스트(숫자 자구로 받힘기)
+            간단한 작업기억 테스트(숫자 거꾸로 말하기)
           </p>
-          <button className="w-full bg-[#4291F2] text-white py-3 rounded font-medium">
+          <button className="w-full h-12 bg-[#4291F2] text-white rounded-full shadow-none font-medium text-base">
             테스트 하러가기
           </button>
         </div>
@@ -213,8 +214,7 @@ export default function ReportPage() {
           </h3>
           <button
             onClick={() => router.push("/consultation")}
-            className="w-full bg-[#4291F2] text-white py-3 rounded-full shadow-none font-medium"
-            style={{ fontSize: "20px" }}
+            className="w-full h-12 bg-[#4291F2] text-white rounded-full shadow-none font-medium text-base"
           >
             상담하러가기
           </button>
