@@ -135,7 +135,7 @@ export default function ReportPage() {
             </li>
           </ul>
           <button
-            onClick={() => router.push("/?tab=consultation")}
+            onClick={() => router.push("/consultation")}
             className="w-full bg-[#4291F2] text-white py-3 rounded-full shadow-none font-medium"
             style={{ fontSize: "20px" }}
           >
@@ -212,7 +212,7 @@ export default function ReportPage() {
             전문가 연결하기
           </h3>
           <button
-            onClick={() => router.push("/?tab=consultation")}
+            onClick={() => router.push("/consultation")}
             className="w-full bg-[#4291F2] text-white py-3 rounded-full shadow-none font-medium"
             style={{ fontSize: "20px" }}
           >
