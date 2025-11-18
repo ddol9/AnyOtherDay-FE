@@ -1,9 +1,6 @@
 import type { Metadata, Viewport } from 'next'
-import { Geist } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
-
-const geist = Geist({ subsets: ["latin"] });
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -42,7 +39,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" style={{ scrollbarGutter: 'stable' }}>
-      <body className={`${geist.className} antialiased overflow-x-hidden`}>
+      <body className="antialiased overflow-x-hidden">
         {children}
         <Analytics />
       </body>
