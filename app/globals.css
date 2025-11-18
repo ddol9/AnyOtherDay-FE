@@ -29,7 +29,7 @@
   --chart-3: #FDEEEE;
   --chart-4: #979EA1;
   --chart-5: #EBF2F8;
-  --radius: 0.9375rem;
+  --radius: 1.125rem;
 }
 
 @theme inline {
