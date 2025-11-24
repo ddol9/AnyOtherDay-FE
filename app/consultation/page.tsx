@@ -6,7 +6,6 @@ import { Card } from "@/components/ui/card";
 import AppLayout from "@/components/layout/AppLayout";
 
 export default function ConsultationPage() {
-  // 임시 병원 데이터
   const hospitals = [
     {
       id: 1,
