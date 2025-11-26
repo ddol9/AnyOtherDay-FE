@@ -5,6 +5,33 @@ import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { X, Upload } from "lucide-react";
+import { wardAPI } from "@/lib/api";
+
+type WardFormData = {
+  name: string;
+  gender: "male" | "female" | "";
+  birthDate: string;
+  relationship: string;
+};
+
+const DUMMY_GUARDIAN = {
+  id: 1,
+  phone: "010-0000-0000",
+};
+
+const calculateAge = (birthDate: string) => {
+  if (!birthDate) return 0;
+  const birth = new Date(birthDate);
+  if (Number.isNaN(birth.getTime())) return 0;
+
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const monthDiff = today.getMonth() - birth.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    age -= 1;
+  }
+  return age;
+};
 import Step1 from "@/components/landing/Step1";
 import Step2 from "@/components/landing/Step2";
 import Step3 from "@/components/landing/Step3";
@@ -20,15 +47,22 @@ export default function LandingPage() {
   const router = useRouter();
 
   // Step 3 폼 데이터
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<WardFormData>({
     name: "",
     gender: "",
     birthDate: "",
     relationship: "",
   });
+  const [wardId, setWardId] = useState<number | null>(null);
+  const [wardSubmissionError, setWardSubmissionError] = useState<string | null>(
+    null,
+  );
+  const [isCreatingWard, setIsCreatingWard] = useState(false);
 
-  // Step 4 설문 답변 (5개 질문, 각 0-4 값)
-  const [surveyAnswers, setSurveyAnswers] = useState<number[]>([2, 2, 2, 2, 2]);
+  // Step 4 설문 답변 (5개 질문, 각 0-4 값, 기본 3=보통)
+  const [surveyAnswers, setSurveyAnswers] = useState<number[]>([3, 3, 3, 3, 3]);
+  const [isUpdatingDiagnosis, setIsUpdatingDiagnosis] = useState(false);
+  const [diagnosisError, setDiagnosisError] = useState<string | null>(null);
 
   // 자동 진행 (Step 1, 2는 3초 후 자동 진행)
   useEffect(() => {
@@ -59,6 +93,7 @@ export default function LandingPage() {
       }
       return updated;
     });
+    setWardSubmissionError(null);
   };
 
   const handleSurveyAnswerChange = (questionIndex: number, value: number) => {
@@ -90,12 +125,119 @@ export default function LandingPage() {
     router.push("/"); // "나중에할래요" 클릭 시 메인 페이지로 이동
   };
 
+  const handleStep4Next = async () => {
+    if (!wardId) {
+      setDiagnosisError("Ward ID가 없습니다.");
+      return;
+    }
+
+    if (!canProceedFromStep4 || isUpdatingDiagnosis) {
+      return;
+    }
+
+    setIsUpdatingDiagnosis(true);
+    setDiagnosisError(null);
+
+    try {
+      // 설문 질문 정의
+      const questions = [
+        "옷 단추를 잠그기 힘들거나 젓가락을 사용하기 어렵다",
+        "물건을 사거나 요금을 지불하는 것이 어렵다",
+        "집안일을 하거나 취미 활동을 하기 어렵다",
+        "대화 중 단어를 떠올리기 어렵거나 말이 막힌다",
+        "오늘 날짜나 요일을 기억하기 어렵다",
+      ];
+
+      // 질문과 답변을 매핑한 객체 생성
+      const surveyMap: Record<string, number> = {};
+      questions.forEach((question, index) => {
+        surveyMap[question] = surveyAnswers[index];
+      });
+
+      // 설문 답변을 diagnosis JSON으로 포맷팅
+      const diagnosisData = {
+        answered: true,
+        survey: surveyMap,
+        completedAt: new Date().toISOString(),
+      };
+
+      await wardAPI.updateDiagnosis(wardId, diagnosisData);
+
+      // 설문 답변 제출 완료, 다음 단계로 이동
+      setCurrentStep(5);
+    } catch (error) {
+      console.error("자가진단 업데이트 중 오류 발생:", error);
+      const message =
+        error instanceof Error
+          ? error.message
+          : "자가진단 저장에 실패했습니다.";
+      setDiagnosisError(message);
+    } finally {
+      setIsUpdatingDiagnosis(false);
+    }
+  };
+
   const canProceedFromStep3 =
     formData.name &&
     formData.gender &&
     formData.birthDate &&
     formData.relationship;
   const canProceedFromStep4 = surveyAnswers.every((answer) => answer !== -1);
+
+  const handleWardSubmit = async () => {
+    if (!canProceedFromStep3 || isCreatingWard) {
+      return;
+    }
+
+    if (wardId) {
+      setCurrentStep(4);
+      return;
+    }
+
+    setIsCreatingWard(true);
+    setWardSubmissionError(null);
+
+    try {
+      const age = calculateAge(formData.birthDate);
+      const payload = {
+        guardianId: DUMMY_GUARDIAN.id,
+        name: formData.name,
+        age,
+        gender: formData.gender as "male" | "female",
+        phone: DUMMY_GUARDIAN.phone,
+        relationship: formData.relationship,
+        diagnosis: JSON.stringify({
+          source: "onboarding",
+          relationship: formData.relationship,
+        }),
+      };
+
+      const response = await wardAPI.createWard(payload);
+      const createdWardId = response?.wardId ?? response?.id ?? null;
+
+      if (createdWardId) {
+        setWardId(createdWardId);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("wardId", String(createdWardId));
+        }
+      }
+
+      if (typeof window !== "undefined") {
+        localStorage.setItem("wardProfile", JSON.stringify(payload));
+      }
+
+      setCurrentStep(4);
+    } catch (error) {
+      console.error("피보호자 등록 중 오류 발생:", error);
+      const message =
+        error instanceof Error
+          ? error.message
+          : "피보호자 등록에 실패했습니다.";
+      setWardSubmissionError(message);
+    } finally {
+      setIsCreatingWard(false);
+    }
+  };
 
   return (
     <div className="relative h-screen w-full overflow-hidden">
@@ -108,14 +250,19 @@ export default function LandingPage() {
       {/* Step 3 */}
       {currentStep === 3 && (
         <div className="relative h-screen">
-          <Step3 formData={formData} onFormChange={handleFormChange} />
+          <Step3
+            formData={formData}
+            onFormChange={handleFormChange}
+            isSubmitting={isCreatingWard}
+            errorMessage={wardSubmissionError}
+          />
           <div className="absolute bottom-8 left-0 right-0 px-4 max-w-md mx-auto">
             <Button
-              onClick={() => setCurrentStep(4)}
-              disabled={!canProceedFromStep3}
+              onClick={handleWardSubmit}
+              disabled={!canProceedFromStep3 || isCreatingWard}
               className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full shadow-none disabled:opacity-50 text-base"
             >
-              다음
+              {isCreatingWard ? "등록 중..." : "다음"}
             </Button>
           </div>
         </div>
@@ -129,14 +276,19 @@ export default function LandingPage() {
             surveyAnswers={surveyAnswers}
             onAnswerChange={handleSurveyAnswerChange}
           />
-          <div className="sticky bottom-0 bg-white px-4 py-4 max-w-md mx-auto">
+          <div className="sticky bottom-0 bg-white px-4 py-4 max-w-md mx-auto w-full">
             <Button
-              onClick={() => setCurrentStep(5)}
-              disabled={!canProceedFromStep4}
+              onClick={handleStep4Next}
+              disabled={!canProceedFromStep4 || isUpdatingDiagnosis}
               className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full shadow-none disabled:opacity-50 text-base"
             >
-              다음
+              {isUpdatingDiagnosis ? "저장 중..." : "다음"}
             </Button>
+            {diagnosisError && (
+              <p className="mt-2 text-center text-sm text-red-500">
+                {diagnosisError}
+              </p>
+            )}
           </div>
         </div>
       )}
