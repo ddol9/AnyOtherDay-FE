@@ -1,11 +1,66 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import AppLayout from "@/components/layout/AppLayout";
 
+interface AnalysisResult {
+  diagnosis?: string;
+  risk_level?: string;
+  confidence_score?: number;
+  disease_probabilities?: {
+    [key: string]: number;
+  };
+  [key: string]: any;
+}
+
 export default function ReportPage() {
   const router = useRouter();
+  const [reportData, setReportData] = useState<AnalysisResult | null>(null);
+  const [wardName, setWardName] = useState("사용자");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchReport = async () => {
+      try {
+        const storedRecordId = localStorage.getItem("currentReportRecordId");
+        const storedWardName = localStorage.getItem("userName");
+
+        if (storedWardName) {
+          setWardName(storedWardName);
+        }
+
+        if (!storedRecordId) {
+          setLoading(false);
+          return;
+        }
+
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/reports/record/${storedRecordId}`
+        );
+
+        if (response.ok) {
+          const result = await response.json();
+          const analysis = result.data?.analysisResult || result.data;
+
+          if (typeof analysis === "string") {
+            setReportData(JSON.parse(analysis));
+          } else {
+            setReportData(analysis);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load report:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (typeof window !== "undefined") {
+      fetchReport();
+    }
+  }, []);
 
   const headerContent = (
     <div className="px-4 py-3 max-w-md mx-auto">
@@ -25,13 +80,26 @@ export default function ReportPage() {
       showNavigation={false}
     >
       <div className="px-4 py-4 max-w-md mx-auto w-full">
-        {/* Main Result */}
-        <div className="mb-6">
-          <h1 className="text-xl font-bold text-foreground mb-2">
-            옥순님이 문제 없음일 확률은
-          </h1>
-          <p className="text-3xl font-bold text-[#4291F2]">35%입니다.</p>
-        </div>
+        {loading ? (
+          <div className="flex items-center justify-center py-8">
+            <p className="text-foreground">레포트를 불러오는 중...</p>
+          </div>
+        ) : (
+          <>
+            {/* Main Result */}
+            <div className="mb-6">
+              <h1 className="text-xl font-bold text-foreground mb-2">
+                {wardName}님의 진단 결과는
+              </h1>
+              <p className="text-3xl font-bold text-[#4291F2]">
+                {reportData?.diagnosis || "분석 중..."}
+              </p>
+              {reportData?.confidence_score && (
+                <p className="text-sm text-muted-foreground mt-2">
+                  신뢰도: {(reportData.confidence_score * 100).toFixed(0)}%
+                </p>
+              )}
+            </div>
 
         {/* Results Summary Card */}
         <div className="bg-white p-5 rounded-md shadow-none mb-4">
@@ -169,56 +237,58 @@ export default function ReportPage() {
               문항 일부 체크가 반영된 결과입니다.
             </li>
           </ul>
-        </div>
-      </div>
+            </div>
 
-      {/* Recommended Follow-up Actions Section */}
-      <div className="bg-[#4291F2] px-4 py-8 max-w-md mx-auto w-full">
-        <h2 className="text-xl font-bold text-white text-center mb-6">
-          권장 후속조치
-        </h2>
+            {/* Recommended Follow-up Actions Section */}
+            <div className="bg-[#4291F2] px-4 py-8 max-w-md mx-auto w-full">
+              <h2 className="text-xl font-bold text-white text-center mb-6">
+                권장 후속조치
+              </h2>
 
-        {/* Re-measure Card */}
-        <div className="bg-white p-5 rounded-md shadow-none mb-4">
-          <h3 className="text-lg font-bold text-foreground mb-3 text-center">
-            다시 측정하기
-          </h3>
-          <p className="text-sm text-foreground text-center mb-4">
-            2주~1개월 내 음성 다시 업로드 → 경향성 확인 서비스 &gt; 분석하기
-            &gt; 이전 리포트 기반 재측정 으로 연결
-          </p>
-          <button className="w-full h-12 bg-[#4291F2] text-white rounded-full shadow-none font-medium text-base">
-            2주 뒤 알림 신청
-          </button>
-        </div>
+              {/* Re-measure Card */}
+              <div className="bg-white p-5 rounded-md shadow-none mb-4">
+                <h3 className="text-lg font-bold text-foreground mb-3 text-center">
+                  다시 측정하기
+                </h3>
+                <p className="text-sm text-foreground text-center mb-4">
+                  2주~1개월 내 음성 다시 업로드 → 경향성 확인 서비스 &gt; 분석하기
+                  &gt; 이전 리포트 기반 재측정 으로 연결
+                </p>
+                <button className="w-full h-12 bg-[#4291F2] text-white rounded-full shadow-none font-medium text-base">
+                  2주 뒤 알림 신청
+                </button>
+              </div>
 
-        {/* Additional Test Card */}
-        <div className="bg-white p-5 rounded-md shadow-none mb-4">
-          <h3 className="text-lg font-bold text-foreground mb-3 text-center">
-            추가 테스트
-          </h3>
-          <p className="text-sm text-foreground text-center mb-4">
-            시계그리기(CDT)
-            <br />
-            간단한 작업기억 테스트(숫자 거꾸로 말하기)
-          </p>
-          <button className="w-full h-12 bg-[#4291F2] text-white rounded-full shadow-none font-medium text-base">
-            테스트 하러가기
-          </button>
-        </div>
+              {/* Additional Test Card */}
+              <div className="bg-white p-5 rounded-md shadow-none mb-4">
+                <h3 className="text-lg font-bold text-foreground mb-3 text-center">
+                  추가 테스트
+                </h3>
+                <p className="text-sm text-foreground text-center mb-4">
+                  시계그리기(CDT)
+                  <br />
+                  간단한 작업기억 테스트(숫자 거꾸로 말하기)
+                </p>
+                <button className="w-full h-12 bg-[#4291F2] text-white rounded-full shadow-none font-medium text-base">
+                  테스트 하러가기
+                </button>
+              </div>
 
-        {/* Expert Connection Card */}
-        <div className="bg-white p-5 rounded-md shadow-none mb-4">
-          <h3 className="text-lg font-bold text-foreground mb-3 text-center">
-            전문가 연결하기
-          </h3>
-          <button
-            onClick={() => router.push("/consultation")}
-            className="w-full h-12 bg-[#4291F2] text-white rounded-full shadow-none font-medium text-base"
-          >
-            상담하러가기
-          </button>
-        </div>
+              {/* Expert Connection Card */}
+              <div className="bg-white p-5 rounded-md shadow-none mb-4">
+                <h3 className="text-lg font-bold text-foreground mb-3 text-center">
+                  전문가 연결하기
+                </h3>
+                <button
+                  onClick={() => router.push("/consultation")}
+                  className="w-full h-12 bg-[#4291F2] text-white rounded-full shadow-none font-medium text-base"
+                >
+                  상담하러가기
+                </button>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </AppLayout>
   );

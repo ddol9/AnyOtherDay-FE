@@ -35,6 +35,9 @@ export default function ListPage() {
     null,
   );
   const [savedUserName, setSavedUserName] = useState("옥순");
+  const [wardId, setWardId] = useState<number | null>(null);
+  const [isUploadingAudio, setIsUploadingAudio] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -42,13 +45,60 @@ export default function ListPage() {
     }
   };
 
-  const handleUpload = () => {
-    if (selectedFile) {
-      setShowUploadModal(false);
-      // Navigate to self-diagnosis confirmation
-      router.push("/");
+  const handleUpload = async () => {
+    if (!selectedFile || !wardId) {
+      setUploadError("파일을 선택하고 wardId가 설정되었는지 확인해주세요.");
+      return;
+    }
+
+    setIsUploadingAudio(true);
+    setUploadError(null);
+
+    try {
+      const formDataWithFile = new FormData();
+      formDataWithFile.append("file", selectedFile);
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/audio-records/ward/${wardId}`,
+        {
+          method: "POST",
+          body: formDataWithFile,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to upload audio");
+      }
+
+      const result = await response.json();
+      const newRecordId = result.data?.recordId || result.data?.id;
+
+      if (newRecordId) {
+        setShowUploadModal(false);
+        setSelectedFile(null);
+        localStorage.setItem("recordId", newRecordId.toString());
+        router.push("/");
+      }
+    } catch (error) {
+      console.error("Error uploading audio:", error);
+      setUploadError("음성 파일 업로드에 실패했습니다. 다시 시도해주세요.");
+    } finally {
+      setIsUploadingAudio(false);
     }
   };
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedWardId = localStorage.getItem("wardId");
+      const storedUserName = localStorage.getItem("userName");
+      if (storedWardId) {
+        setWardId(parseInt(storedWardId));
+      }
+      if (storedUserName) {
+        setSavedUserName(storedUserName);
+      }
+    }
+  }, []);
 
   // Sample report data grouped by month
   const reportsByMonth = [
@@ -299,6 +349,12 @@ export default function ListPage() {
                 </div>
 
                 <div className="space-y-4 w-full">
+                  {uploadError && (
+                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
+                      {uploadError}
+                    </div>
+                  )}
+
                   <div className="border-2 border-dashed border-border rounded-md p-8 text-center">
                     <input
                       type="file"
@@ -336,10 +392,10 @@ export default function ListPage() {
 
                   <Button
                     onClick={handleUpload}
-                    disabled={!selectedFile}
+                    disabled={!selectedFile || isUploadingAudio}
                     className="w-full h-12 bg-primary hover:bg-primary/90 text-white font-medium rounded-full disabled:opacity-50 shadow-none text-base"
                   >
-                    업로드
+                    {isUploadingAudio ? "업로드 중..." : "업로드"}
                   </Button>
                 </div>
               </div>

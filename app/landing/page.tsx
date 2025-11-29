@@ -27,8 +27,22 @@ export default function LandingPage() {
     relationship: "",
   });
 
+  // Step 3 ward 정보
+  const [wardId, setWardId] = useState<number | null>(null);
+
   // Step 4 설문 답변 (5개 질문, 각 0-4 값)
   const [surveyAnswers, setSurveyAnswers] = useState<number[]>([2, 2, 2, 2, 2]);
+  const [isUpdatingDiagnosis, setIsUpdatingDiagnosis] = useState(false);
+  const [diagnosisError, setDiagnosisError] = useState<string | null>(null);
+
+  // Step 5 오디오 업로드
+  const [recordId, setRecordId] = useState<number | null>(null);
+  const [isUploadingAudio, setIsUploadingAudio] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  // Step 6 AI 분석 결과
+  const [analysisReport, setAnalysisReport] = useState<any>(null);
+  const [isCheckingReport, setIsCheckingReport] = useState(false);
 
   // 자동 진행 (Step 1, 2는 3초 후 자동 진행)
   useEffect(() => {
@@ -80,10 +94,7 @@ export default function LandingPage() {
   };
 
   const handleUpload = () => {
-    if (selectedFile) {
-      setShowUploadModal(false);
-      setCurrentStep(6); // 업로드 후 Step 6으로 이동
-    }
+    handleAudioUpload();
   };
 
   const handleSkip = () => {
@@ -96,6 +107,189 @@ export default function LandingPage() {
     formData.birthDate &&
     formData.relationship;
   const canProceedFromStep4 = surveyAnswers.every((answer) => answer !== -1);
+
+  const handleStep3Submit = async () => {
+    if (!canProceedFromStep3) return;
+
+    try {
+      const birthDate = new Date(formData.birthDate);
+      const age = new Date().getFullYear() - birthDate.getFullYear();
+
+      const wardData = {
+        name: formData.name,
+        gender: formData.gender === "male" ? "M" : "F",
+        birthDate: formData.birthDate,
+        age: age,
+        relationship: formData.relationship,
+      };
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/wards`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(wardData),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to create ward");
+      }
+
+      const result = await response.json();
+      const newWardId = result.data?.wardId || result.data?.id;
+
+      if (newWardId) {
+        setWardId(newWardId);
+        localStorage.setItem("wardId", newWardId.toString());
+      }
+
+      setCurrentStep(4);
+    } catch (error) {
+      console.error("Error creating ward:", error);
+      alert("피보호자 정보 저장에 실패했습니다. 다시 시도해주세요.");
+    }
+  };
+
+  const handleStep4Submit = async () => {
+    if (!canProceedFromStep4 || !wardId) return;
+
+    setIsUpdatingDiagnosis(true);
+    setDiagnosisError(null);
+
+    try {
+      const surveyMap: Record<string, number> = {};
+      const questions = [
+        "최근 한 달간 기억이 잘 안 나는 일이 있었나요?",
+        "일상생활에서 시간을 놓치거나 헷갈린 적이 있나요?",
+        "가족이나 친구 이름을 잘 못 떠올린 적이 있나요?",
+        "약 복용 시간을 자주 까먹나요?",
+        "최근 들은 대화 내용이 기억에 남지 않는 경우가 있나요?",
+      ];
+
+      questions.forEach((q, i) => {
+        surveyMap[q] = surveyAnswers[i];
+      });
+
+      const diagnosisData = {
+        answered: true,
+        survey: surveyMap,
+        completedAt: new Date().toISOString(),
+      };
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/wards/${wardId}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ diagnosis: JSON.stringify(diagnosisData) }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update diagnosis");
+      }
+
+      setCurrentStep(5);
+    } catch (error) {
+      console.error("Error updating diagnosis:", error);
+      setDiagnosisError("진단 정보 저장에 실패했습니다. 다시 시도해주세요.");
+    } finally {
+      setIsUpdatingDiagnosis(false);
+    }
+  };
+
+  const handleAudioUpload = async () => {
+    if (!selectedFile || !wardId) {
+      setUploadError("파일을 선택하고 다시 시도해주세요.");
+      return;
+    }
+
+    setIsUploadingAudio(true);
+    setUploadError(null);
+
+    try {
+      const formDataWithFile = new FormData();
+      formDataWithFile.append("file", selectedFile);
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/audio-records/ward/${wardId}`,
+        {
+          method: "POST",
+          body: formDataWithFile,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to upload audio");
+      }
+
+      const result = await response.json();
+      const newRecordId = result.data?.recordId || result.data?.id;
+
+      if (newRecordId) {
+        setRecordId(newRecordId);
+        localStorage.setItem("recordId", newRecordId.toString());
+        setShowUploadModal(false);
+        setSelectedFile(null);
+        setCurrentStep(6);
+      }
+    } catch (error) {
+      console.error("Error uploading audio:", error);
+      setUploadError("음성 파일 업로드에 실패했습니다. 다시 시도해주세요.");
+    } finally {
+      setIsUploadingAudio(false);
+    }
+  };
+
+  const pollReportCompletion = async (recId: number): Promise<boolean> => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/audio-records/${recId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to check record status");
+      }
+
+      const result = await response.json();
+      const status = result.data?.status || result.data?.recordStatus;
+
+      if (status === "completed") {
+        const reportResponse = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/reports/record/${recId}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (reportResponse.ok) {
+          const reportResult = await reportResponse.json();
+          const report = reportResult.data || reportResult;
+          setAnalysisReport(report);
+          return true;
+        }
+      }
+
+      return false;
+    } catch (error) {
+      console.error("Error polling report:", error);
+      return false;
+    }
+  };
 
   return (
     <div className="relative h-screen w-full overflow-hidden">
@@ -111,7 +305,7 @@ export default function LandingPage() {
           <Step3 formData={formData} onFormChange={handleFormChange} />
           <div className="absolute bottom-8 left-0 right-0 px-4 max-w-md mx-auto">
             <Button
-              onClick={() => setCurrentStep(4)}
+              onClick={handleStep3Submit}
               disabled={!canProceedFromStep3}
               className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full shadow-none disabled:opacity-50 text-base"
             >
@@ -130,12 +324,17 @@ export default function LandingPage() {
             onAnswerChange={handleSurveyAnswerChange}
           />
           <div className="sticky bottom-0 bg-white px-4 py-4 max-w-md mx-auto">
+            {diagnosisError && (
+              <div className="mb-3 p-3 bg-red-100 text-red-700 rounded-md text-sm">
+                {diagnosisError}
+              </div>
+            )}
             <Button
-              onClick={() => setCurrentStep(5)}
-              disabled={!canProceedFromStep4}
+              onClick={handleStep4Submit}
+              disabled={!canProceedFromStep4 || isUpdatingDiagnosis}
               className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full shadow-none disabled:opacity-50 text-base"
             >
-              다음
+              {isUpdatingDiagnosis ? "저장 중..." : "다음"}
             </Button>
           </div>
         </div>
@@ -147,7 +346,13 @@ export default function LandingPage() {
       )}
 
       {/* Step 6 */}
-      {currentStep === 6 && <Step6 onNext={() => setCurrentStep(7)} />}
+      {currentStep === 6 && (
+        <Step6
+          recordId={recordId}
+          onNext={() => setCurrentStep(7)}
+          onPoll={pollReportCompletion}
+        />
+      )}
 
       {/* Step 7 */}
       {currentStep === 7 && <Step7 />}
@@ -210,12 +415,18 @@ export default function LandingPage() {
                   </div>
                 )}
 
+                {uploadError && (
+                  <div className="p-3 bg-red-100 text-red-700 rounded-md text-sm">
+                    {uploadError}
+                  </div>
+                )}
+
                 <Button
                   onClick={handleUpload}
-                  disabled={!selectedFile}
+                  disabled={!selectedFile || isUploadingAudio}
                   className="w-full h-12 bg-primary hover:bg-primary/90 text-white font-medium rounded-full disabled:opacity-50 shadow-none text-base"
                 >
-                  업로드
+                  {isUploadingAudio ? "업로드 중..." : "업로드"}
                 </Button>
               </div>
             </div>
