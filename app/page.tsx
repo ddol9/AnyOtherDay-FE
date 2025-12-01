@@ -28,7 +28,7 @@ export default function HomePage() {
   // 예시 데이터
   const [userName, setUserName] = useState("");
   const daysWithoutCall = 10;
-  const [recentStatus, setRecentStatus] = useState("뇌졸중");
+  const [recentStatus, setRecentStatus] = useState<string | null>(null);
   const alertCount = 3;
 
   // wardId와 최신 리포트 로드
@@ -39,6 +39,7 @@ export default function HomePage() {
       const storedUserName = localStorage.getItem("userName");
       const storedRecordId = localStorage.getItem("recordId");
       const storedHasCheckedReport = localStorage.getItem("hasCheckedReport");
+      const storedLatestDisease = localStorage.getItem("latestDiseaseName");
 
       console.log("localStorage에서 로드:");
       console.log("- wardId:", storedWardId);
@@ -58,6 +59,10 @@ export default function HomePage() {
           setRecordId(parsedRecordId);
           console.log("recordId 설정됨:", parsedRecordId);
         }
+      }
+      if (storedLatestDisease) {
+        setRecentStatus(storedLatestDisease);
+        console.log("최근 대표 질병 설정됨:", storedLatestDisease);
       }
       if (storedHasCheckedReport === "true") {
         setHasCheckedReport(true);
@@ -204,6 +209,40 @@ export default function HomePage() {
             console.log("최종 리포트 데이터:", report);
 
             setLatestReport(report);
+            // 분석 결과에서 대표 질병(가장 높은 accuracy)을 계산하여 상태/로컬스토리지에 저장
+            try {
+              let analysisResult =
+                (report as any).analysisResult ||
+                (report as any).data?.analysisResult;
+
+              if (typeof analysisResult === "string") {
+                analysisResult = JSON.parse(analysisResult);
+              }
+
+              const accuracy: number[] | undefined = analysisResult?.accuracy;
+              if (accuracy && Array.isArray(accuracy) && accuracy.length > 0) {
+                let maxIdx = 0;
+                let maxAccuracy = accuracy[0] || 0;
+
+                accuracy.forEach((acc, idx) => {
+                  if (acc > maxAccuracy) {
+                    maxAccuracy = acc;
+                    maxIdx = idx;
+                  }
+                });
+
+                const diseaseNames = ["뇌졸중", "퇴행성 뇌질환", "정상"];
+                const diseaseName = diseaseNames[maxIdx] || "질환";
+
+                setRecentStatus(diseaseName);
+                if (typeof window !== "undefined") {
+                  localStorage.setItem("latestDiseaseName", diseaseName);
+                }
+              }
+            } catch (error) {
+              console.error("홈 화면 대표 질병 계산 중 오류:", error);
+            }
+
             setShowConfirmModal(true);
             setIsCheckingReport(false);
             console.log("=== AI 처리 완료 ===");
@@ -311,13 +350,24 @@ export default function HomePage() {
           <div className="text-center">
             <p style={{ fontSize: "14px", color: "#979EA1" }}>최근 결과</p>
             <div style={{ marginTop: "5px" }}>
-              <h2 style={{ fontSize: "20px", color: "#303233" }}>
-                최근 {userName ? `${userName}님의` : ""} 상태는
-              </h2>
-              <h2 className="font-bold" style={{ fontSize: "28px" }}>
-                <span className="text-primary">{recentStatus}</span>
-                <span style={{ color: "#303233" }}>이 의심돼요</span>
-              </h2>
+              {recentStatus ? (
+                <>
+                  <h2 style={{ fontSize: "20px", color: "#303233" }}>
+                    최근 {userName ? `${userName}님의` : ""} 상태는
+                  </h2>
+                  <h2 className="font-bold" style={{ fontSize: "28px" }}>
+                    <span className="text-primary">{recentStatus}</span>
+                    <span style={{ color: "#303233" }}>이 의심돼요</span>
+                  </h2>
+                </>
+              ) : (
+                <h2
+                  className="font-bold"
+                  style={{ fontSize: "20px", color: "#303233" }}
+                >
+                  새로운 레포트를 생성해보세요
+                </h2>
+              )}
             </div>
 
             <div
@@ -325,31 +375,33 @@ export default function HomePage() {
               style={{ marginTop: "5px", marginLeft: "8px" }}
             >
               <Image
-                src="/icons/home/home-warning.svg"
+                src="/icons/list/list-call.svg"
                 alt="경고"
                 width={162}
                 height={126}
               />
             </div>
 
-            <Link href="/report">
-              <Card
-                className="bg-destructive border-0 p-3.5 rounded-md cursor-pointer hover:opacity-90 transition-opacity shadow-none"
-                style={{ marginTop: "5px" }}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-md font-medium text-destructive-foreground">
-                    주의 할 내용
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold text-destructive-foreground">
-                      {alertCount}건
+            {recentStatus && (
+              <Link href="/report">
+                <Card
+                  className="bg-destructive border-0 p-3.5 rounded-md cursor-pointer hover:opacity-90 transition-opacity shadow-none"
+                  style={{ marginTop: "5px" }}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-md font-medium text-destructive-foreground">
+                      주의 할 내용
                     </span>
-                    <ChevronRight className="h-4 w-4 text-destructive-foreground" />
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-destructive-foreground">
+                        {alertCount}건
+                      </span>
+                      <ChevronRight className="h-4 w-4 text-destructive-foreground" />
+                    </div>
                   </div>
-                </div>
-              </Card>
-            </Link>
+                </Card>
+              </Link>
+            )}
           </div>
         </Card>
 

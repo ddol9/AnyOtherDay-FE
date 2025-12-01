@@ -140,6 +140,29 @@ export default function ReportPage() {
 
           console.log("최종 분석 데이터:", analysisResult);
           setReportData(analysisResult);
+
+          // 대표 질병(가장 높은 accuracy 기준)을 로컬스토리지에 저장하여 메인 홈에서 사용할 수 있게 함
+          try {
+            const accuracy: number[] | undefined = analysisResult?.accuracy;
+            if (accuracy && Array.isArray(accuracy) && accuracy.length > 0) {
+              let maxIdx = 0;
+              let maxAccuracy = accuracy[0] || 0;
+
+              accuracy.forEach((acc, idx) => {
+                if (acc > maxAccuracy) {
+                  maxAccuracy = acc;
+                  maxIdx = idx;
+                }
+              });
+
+              const diseaseName = diseaseNames[maxIdx] || "질환";
+              if (typeof window !== "undefined") {
+                localStorage.setItem("latestDiseaseName", diseaseName);
+              }
+            }
+          } catch (error) {
+            console.error("대표 질병 저장 중 오류:", error);
+          }
         } else {
           console.error(
             "보고서 조회 실패:",

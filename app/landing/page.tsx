@@ -380,7 +380,11 @@ export default function LandingPage() {
 
       {/* Step 5 */}
       {currentStep === 5 && (
-        <Step5 onUpload={() => setShowUploadModal(true)} onSkip={handleSkip} />
+        <Step5
+          userName={formData.name}
+          onUpload={() => setShowUploadModal(true)}
+          onSkip={handleSkip}
+        />
       )}
 
       {/* Step 6 */}

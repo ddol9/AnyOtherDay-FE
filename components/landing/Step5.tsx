@@ -1,22 +1,25 @@
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
 interface Step5Props {
   onUpload: () => void;
   onSkip: () => void;
+  userName?: string;
 }
 
-export default function Step5({ onUpload, onSkip }: Step5Props) {
+export default function Step5({ onUpload, onSkip, userName }: Step5Props) {
   return (
     <div className="flex h-screen w-full flex-col items-center justify-between bg-white px-4 py-12 max-w-md mx-auto">
       <div className="flex flex-1 items-center justify-center">
-        <Image
-          src="/icons/landing/landing-text15.svg"
-          alt="음성 업로드 안내"
-          width={400}
-          height={400}
-          className="object-contain"
-        />
+        <div className="text-center">
+          <p className="text-[22px] leading-snug font-extrabold text-[#979EA1]">
+            {userName
+              ? `${userName}님과의 통화를 지금 업로드 하면`
+              : "피보호자님과의 통화를 지금 업로드 하면"}
+          </p>
+          <p className="mt-2 text-[22px] leading-snug font-extrabold text-[#979EA1]">
+            바로 분석할 수 있어요!
+          </p>
+        </div>
       </div>
 
       <div className="w-full space-y-2 pb-8">
