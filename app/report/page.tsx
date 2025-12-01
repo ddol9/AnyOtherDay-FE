@@ -241,7 +241,7 @@ export default function ReportPage() {
       headerContent={headerContent}
       showNavigation={false}
     >
-      <div className="px-4 py-4 max-w-md mx-auto w-full">
+      <div className="px-4 py-4 max-w-md mx_auto w-full tracking-[-0.04em]">
         {/* Main Result */}
         <div className="mb-6">
           {highestRisk && (
