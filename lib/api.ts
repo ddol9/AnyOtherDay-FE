@@ -51,6 +51,7 @@ export const wardAPI = {
   async createWard(data: {
     guardianId: number;
     name: string;
+    birthDate: string;
     age: number;
     gender: 'male' | 'female';
     phone: string;

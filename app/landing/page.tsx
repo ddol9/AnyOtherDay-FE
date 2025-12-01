@@ -14,11 +14,6 @@ type WardFormData = {
   relationship: string;
 };
 
-const DUMMY_GUARDIAN = {
-  id: 1,
-  phone: "010-0000-0000",
-};
-
 const calculateAge = (birthDate: string) => {
   if (!birthDate) return 0;
   const birth = new Date(birthDate);
@@ -32,6 +27,12 @@ const calculateAge = (birthDate: string) => {
   }
   return age;
 };
+
+const DUMMY_GUARDIAN = {
+  id: 1,
+  phone: "010-0000-0000",
+};
+
 import Step1 from "@/components/landing/Step1";
 import Step2 from "@/components/landing/Step2";
 import Step3 from "@/components/landing/Step3";
@@ -124,6 +125,7 @@ export default function LandingPage() {
       const payload = {
         guardianId: DUMMY_GUARDIAN.id,
         name: formData.name,
+        birthDate: formData.birthDate,
         age,
         gender: formData.gender as "male" | "female",
         phone: DUMMY_GUARDIAN.phone,

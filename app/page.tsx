@@ -11,7 +11,7 @@ import Image from "next/image";
 
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState("home");
-  const [showAlert, setShowAlert] = useState(true);
+  const [showAlert, setShowAlert] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -21,6 +21,7 @@ export default function HomePage() {
   const [recordId, setRecordId] = useState<number | null>(null);
   const [isCheckingReport, setIsCheckingReport] = useState(false);
   const [latestReport, setLatestReport] = useState<any>(null);
+  const [hasCheckedReport, setHasCheckedReport] = useState(false);
   const isReportReady = !!latestReport;
   const router = useRouter();
 
@@ -36,6 +37,8 @@ export default function HomePage() {
     if (typeof window !== "undefined") {
       const storedWardId = localStorage.getItem("wardId");
       const storedUserName = localStorage.getItem("userName");
+      const storedRecordId = localStorage.getItem("recordId");
+      const storedHasCheckedReport = localStorage.getItem("hasCheckedReport");
 
       console.log("localStorage에서 로드:");
       console.log("- wardId:", storedWardId);
@@ -48,6 +51,16 @@ export default function HomePage() {
       if (storedUserName) {
         setUserName(storedUserName);
         console.log("userName 설정됨:", storedUserName);
+      }
+      if (storedRecordId) {
+        const parsedRecordId = parseInt(storedRecordId);
+        if (!Number.isNaN(parsedRecordId)) {
+          setRecordId(parsedRecordId);
+          console.log("recordId 설정됨:", parsedRecordId);
+        }
+      }
+      if (storedHasCheckedReport === "true") {
+        setHasCheckedReport(true);
       }
     }
   }, []);
@@ -114,6 +127,11 @@ export default function HomePage() {
         localStorage.setItem("recordId", newRecordId.toString());
         console.log("recordId를 localStorage에 저장함");
 
+        // 새 리포트 업로드 시, 아직 리포트를 확인하지 않은 상태로 리셋
+        setHasCheckedReport(false);
+        localStorage.setItem("hasCheckedReport", "false");
+        setShowAlert(true);
+
         setShowUploadModal(false);
         setSelectedFile(null);
 
@@ -161,6 +179,14 @@ export default function HomePage() {
         const status = result.data?.status;
         console.log("현재 상태:", status);
 
+        if (status === "failed" || status === "error") {
+          console.log("AI 응답 실패 상태 감지. 폴링 중단");
+          setIsCheckingReport(false);
+          setShowAlert(false);
+          setShowConfirmModal(true);
+          return;
+        }
+
         if (status === "completed") {
           console.log("상태가 'completed'로 변경됨! 리포트 조회 중...");
 
@@ -184,6 +210,11 @@ export default function HomePage() {
             return;
           } else {
             console.warn("리포트 조회 실패:", reportResponse.status);
+            // 리포트 조회 실패 시 폴링 중단
+            setIsCheckingReport(false);
+            setShowAlert(false);
+            setShowConfirmModal(true);
+            return;
           }
         } else {
           console.log(`대기 중... (${pollInterval}ms 후 재시도)`);
@@ -197,6 +228,7 @@ export default function HomePage() {
 
     console.log("타임아웃: 최대 시도 횟수 도달");
     setIsCheckingReport(false);
+    setShowAlert(false);
     setShowConfirmModal(true);
   };
 
@@ -341,28 +373,6 @@ export default function HomePage() {
             </Button>
           </div>
         </Card>
-
-        <Link href="/list">
-          <Card className="bg-card border-0 p-5 rounded-md shadow-none cursor-pointer hover:opacity-90 transition-opacity">
-            <div className="flex items-center justify-between">
-              <div>
-                <p
-                  style={{ fontSize: "14px", color: "#979EA1" }}
-                  className="mb-1"
-                >
-                  이전 분석 기록
-                </p>
-                <p
-                  className="font-semibold"
-                  style={{ fontSize: "16px", color: "#303233" }}
-                >
-                  레포트 보기
-                </p>
-              </div>
-              <ChevronRight className="h-5 w-5 text-muted-foreground" />
-            </div>
-          </Card>
-        </Link>
       </div>
 
       {showUploadModal && (
@@ -476,12 +486,16 @@ export default function HomePage() {
                     className="flex-1 h-12 bg-primary hover:bg-primary/90 text-white font-medium rounded-full shadow-none text-base"
                     onClick={() => {
                       setShowConfirmModal(false);
+                      setShowAlert(false);
                       if (recordId) {
                         localStorage.setItem(
                           "currentReportRecordId",
                           recordId.toString(),
                         );
                       }
+                      // 리포트 확인 시, 준비중 배너는 다시 보이지 않도록 상태 저장
+                      setHasCheckedReport(true);
+                      localStorage.setItem("hasCheckedReport", "true");
                       router.push("/report");
                     }}
                   >

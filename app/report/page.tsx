@@ -32,6 +32,51 @@ function getRiskColor(accuracy: number): string {
   return "bg-green-500";
 }
 
+// 종합 소견/요약 텍스트 파싱 유틸
+function parseSummaryText(raw?: unknown): string[] {
+  if (raw == null) return [];
+
+  // raw 타입이 문자열이 아닐 수도 있어서 방어적으로 처리
+  let text: string;
+  if (typeof raw === "string") {
+    text = raw;
+  } else if (typeof raw === "object") {
+    try {
+      text = JSON.stringify(raw);
+    } catch {
+      text = String(raw);
+    }
+  } else {
+    text = String(raw);
+  }
+
+  text = text.trim();
+  text = text.replace(/^종합\s*소견\s*:\s*/u, "");
+
+  if (!text) return [];
+
+  // 줄 단위로 나눈 뒤, 각 줄에서 문장 단위로 다시 분리
+  const lines = text.split(/[\r\n]+/);
+  const sentences: string[] = [];
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+
+    const parts = trimmed.match(/[^.!?]+[.!?]?/g);
+    if (parts) {
+      for (const part of parts) {
+        const s = part.trim();
+        if (s) sentences.push(s);
+      }
+    } else {
+      sentences.push(trimmed);
+    }
+  }
+
+  return sentences;
+}
+
 export default function ReportPage() {
   const router = useRouter();
   const [reportData, setReportData] = useState<DiagnoseResponse | null>(null);
@@ -157,6 +202,10 @@ export default function ReportPage() {
   const secondaryAccuracy = reportData.accuracy?.[1] || 0;
   const normalAccuracy = reportData.accuracy?.[2] || 0;
 
+  const summarySentences = parseSummaryText(
+    reportData.total || reportData.summary || "",
+  );
+
   // 가장 높은 퍼센트의 병명 찾기
   const getHighestRiskDisease = () => {
     if (!reportData.accuracy) return null;
@@ -207,14 +256,20 @@ export default function ReportPage() {
           )}
         </div>
 
-        {/* Results Summary Card - 종합소견만 */}
+        {/* Results Summary Card - 종합 소견 */}
         <div className="bg-white p-5 rounded-md shadow-none mb-4">
-          <p className="text-sm text-foreground">
-            종합 소견:{" "}
-            {reportData.total ||
-              reportData.summary ||
-              "분석 결과를 기다리고 있습니다."}
-          </p>
+          <div className="text-sm text-foreground">
+            <span className="font-semibold">종합 소견:</span>
+            {summarySentences.length > 0 ? (
+              <div className="mt-2 space-y-1">
+                {summarySentences.map((sentence, idx) => (
+                  <p key={idx}>{sentence}</p>
+                ))}
+              </div>
+            ) : (
+              <span className="ml-1">분석 결과를 기다리고 있습니다.</span>
+            )}
+          </div>
         </div>
 
         {/* Analysis Results Card - 분석 결과 별도 문단 */}
