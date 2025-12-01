@@ -40,6 +40,27 @@ const surveyScaleLabels = [
   "매우 그렇다",
 ];
 
+// Java LocalDateTime 배열 [year, month, day, hour, minute, second]를 Date로 변환
+function parseLocalDateTime(dateValue: any): Date | null {
+  if (!dateValue) return null;
+
+  // 이미 문자열 형식이면 그대로 파싱
+  if (typeof dateValue === "string") {
+    const date = new Date(dateValue);
+    return isNaN(date.getTime()) ? null : date;
+  }
+
+  // 배열 형식 [year, month, day, hour, minute, second, nano?]
+  if (Array.isArray(dateValue) && dateValue.length >= 3) {
+    const [year, month, day, hour = 0, minute = 0, second = 0] = dateValue;
+    // month는 0-based이므로 -1
+    const date = new Date(year, month - 1, day, hour, minute, second);
+    return isNaN(date.getTime()) ? null : date;
+  }
+
+  return null;
+}
+
 export default function ListPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"integrated" | "self-diagnosis">(
@@ -172,6 +193,13 @@ export default function ListPage() {
         Array.isArray(audioRecordsList) ? audioRecordsList.length : 0,
       );
 
+      if (Array.isArray(reportsList) && reportsList.length > 0) {
+        console.log(
+          "첫 번째 리포트 상세:",
+          JSON.stringify(reportsList[0], null, 2),
+        );
+      }
+
       // 오디오 레코드를 recordId 기준으로 맵핑
       const audioRecordsMap = new Map(
         (Array.isArray(audioRecordsList) ? audioRecordsList : []).map(
@@ -181,16 +209,26 @@ export default function ListPage() {
 
       // 리포트에 대응하는 오디오 레코드 정보 추가
       const mergedReports = (Array.isArray(reportsList) ? reportsList : []).map(
-        (report: any) => ({
-          ...report,
-          // 오디오 레코드의 status와 uploadedAt 추가
-          status: audioRecordsMap.get(report.recordId)?.status || "unknown",
-          uploaded_at:
-            audioRecordsMap.get(report.recordId)?.uploadedAt ||
-            report.createdAt,
-        }),
+        (report: any) => {
+          const audioRecord = audioRecordsMap.get(report.recordId);
+          return {
+            ...report,
+            // 오디오 레코드의 status와 uploadedAt 추가
+            status: audioRecord?.status || "unknown",
+            // snake_case와 camelCase 모두 포함하여 호환성 확보
+            uploaded_at: audioRecord?.uploadedAt || report.createdAt,
+            uploadedAt: audioRecord?.uploadedAt || report.createdAt,
+          };
+        },
       );
 
+      console.log("병합된 리포트 목록:", mergedReports);
+      if (mergedReports.length > 0) {
+        console.log(
+          "첫 번째 병합된 리포트:",
+          JSON.stringify(mergedReports[0], null, 2),
+        );
+      }
       setReports(mergedReports);
     } catch (error) {
       console.error("리포트 조회 중 에러:", error);
@@ -209,26 +247,44 @@ export default function ListPage() {
   }, [activeTab]);
 
   const groupReportsByMonth = (reportsData: any[]) => {
+    console.log("groupReportsByMonth 입력 데이터:", reportsData);
     const grouped: Record<string, any[]> = {};
 
     // 유효한 데이터만 필터링
     const validReports = reportsData.filter((report) => {
-      const dateString =
-        report.created_at || report.uploaded_at || report.recordedAt;
-      if (!dateString) return false;
+      const dateValue =
+        report.createdAt ||
+        report.created_at ||
+        report.uploaded_at ||
+        report.uploadedAt ||
+        report.recordedAt;
 
-      const date = new Date(dateString);
-      if (isNaN(date.getTime()) || date.getFullYear() < 2000) {
-        console.warn("유효하지 않은 날짜 필터링됨:", dateString, report);
+      if (!dateValue) return false;
+
+      const date = parseLocalDateTime(dateValue);
+      if (!date || date.getFullYear() < 2000) {
+        console.warn("유효하지 않은 날짜 필터링됨:", dateValue, report);
         return false;
       }
       return true;
     });
 
+    console.log("유효한 리포트 수:", validReports.length);
+    if (validReports.length === 0) {
+      console.warn("유효한 리포트가 없습니다. 입력 데이터:", reportsData);
+    }
+
     validReports.forEach((report) => {
-      const dateString =
-        report.created_at || report.uploaded_at || report.recordedAt;
-      const createdDate = new Date(dateString);
+      const dateValue =
+        report.createdAt ||
+        report.created_at ||
+        report.uploaded_at ||
+        report.uploadedAt ||
+        report.recordedAt;
+      const createdDate = parseLocalDateTime(dateValue);
+
+      if (!createdDate) return;
+
       const monthKey = createdDate.toLocaleDateString("ko-KR", {
         year: "numeric",
         month: "long",
@@ -244,23 +300,39 @@ export default function ListPage() {
       .map(([month, monthReports]) => ({
         month,
         reports: monthReports.sort((a, b) => {
-          const aDateStr = a.created_at || a.uploaded_at || a.recordedAt;
-          const bDateStr = b.created_at || b.uploaded_at || b.recordedAt;
-          return new Date(bDateStr).getTime() - new Date(aDateStr).getTime();
+          const aDateValue =
+            a.createdAt ||
+            a.created_at ||
+            a.uploaded_at ||
+            a.uploadedAt ||
+            a.recordedAt;
+          const bDateValue =
+            b.createdAt ||
+            b.created_at ||
+            b.uploaded_at ||
+            b.uploadedAt ||
+            b.recordedAt;
+          const aDate = parseLocalDateTime(aDateValue);
+          const bDate = parseLocalDateTime(bDateValue);
+          return (bDate?.getTime() || 0) - (aDate?.getTime() || 0);
         }),
       }))
       .sort((a, b) => {
-        const aDateStr =
+        const aDateValue =
+          a.reports[0]?.createdAt ||
           a.reports[0]?.created_at ||
           a.reports[0]?.uploaded_at ||
-          a.reports[0]?.recordedAt ||
-          "";
-        const bDateStr =
+          a.reports[0]?.uploadedAt ||
+          a.reports[0]?.recordedAt;
+        const bDateValue =
+          b.reports[0]?.createdAt ||
           b.reports[0]?.created_at ||
           b.reports[0]?.uploaded_at ||
-          b.reports[0]?.recordedAt ||
-          "";
-        return new Date(bDateStr).getTime() - new Date(aDateStr).getTime();
+          b.reports[0]?.uploadedAt ||
+          b.reports[0]?.recordedAt;
+        const aDate = parseLocalDateTime(aDateValue);
+        const bDate = parseLocalDateTime(bDateValue);
+        return (bDate?.getTime() || 0) - (aDate?.getTime() || 0);
       });
   };
 
@@ -294,7 +366,8 @@ export default function ListPage() {
 
         // 정상이 질병들보다 높으면 정상 표시, 아니면 뇌질환 표시
         const isNormalHighest =
-          normalAccuracy >= diseaseAccuracy && normalAccuracy >= secondaryAccuracy;
+          normalAccuracy >= diseaseAccuracy &&
+          normalAccuracy >= secondaryAccuracy;
 
         let titleDisease: string;
         let titleAccuracy: number;
@@ -339,19 +412,20 @@ export default function ListPage() {
   };
 
   const getReportDate = (report: any): string => {
-    // audio_record 조회 시: uploaded_at 사용
-    // report 조회 시: created_at 사용
-    const dateString =
-      report.created_at || report.uploaded_at || report.recordedAt;
+    const dateValue =
+      report.createdAt ||
+      report.created_at ||
+      report.uploadedAt ||
+      report.uploaded_at ||
+      report.recordedAt;
 
-    if (!dateString) {
+    if (!dateValue) {
       return "날짜 정보 없음";
     }
 
-    const date = new Date(dateString);
+    const date = parseLocalDateTime(dateValue);
 
-    // 유효한 날짜 확인 (1970년 이상)
-    if (isNaN(date.getTime()) || date.getFullYear() < 2000) {
+    if (!date || date.getFullYear() < 2000) {
       return "날짜 정보 없음";
     }
 

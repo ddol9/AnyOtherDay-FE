@@ -279,7 +279,8 @@ export default function ReportPage() {
               <p
                 className="text-3xl font-bold mt-2"
                 style={{
-                  color: titleDisplay.disease === "뇌질환" ? "#EF4444" : "#4291F2",
+                  color:
+                    titleDisplay.disease === "뇌질환" ? "#EF4444" : "#4291F2",
                 }}
               >
                 {titleDisplay.accuracy.toFixed(0)}%입니다.
@@ -359,8 +360,22 @@ export default function ReportPage() {
           allDiseases
             .map((diseaseName, idx) => {
               const riskLevelText = reportData.risk?.[idx] || "정보 없음";
-              const explainText =
-                reportData.explain?.[idx] || `${diseaseName} 관련 설명입니다.`;
+
+              // explain이 null/undefined여도 인덱스는 유지하고, 카드 렌더링 여부만 나중에 판단
+              const rawExplain =
+                Array.isArray(reportData.explain) &&
+                typeof idx === "number" &&
+                idx >= 0
+                  ? reportData.explain[idx]
+                  : undefined;
+
+              const hasExplain =
+                rawExplain != null &&
+                String(rawExplain).trim().length > 0 &&
+                String(rawExplain).trim() !== "null";
+
+              // null 또는 빈 문자열인 경우에는 설명을 강제로 채우지 않고, 그대로 패스
+              const explainText = hasExplain ? String(rawExplain) : "";
 
               // explain 텍스트를 불렛 포맷으로 변환 (문장 기준)
               const formatExplainAsBullets = (text: string) => {
@@ -406,10 +421,13 @@ export default function ReportPage() {
                 diseaseName,
                 riskLevelText,
                 explainText,
+                hasExplain,
                 formatExplainAsBullets,
                 getRiskColorByText,
               };
             })
+            // "정상" 카드는 숨기고, 나머지는 explain 유무와 상관없이 모두 카드 생성
+            // (explain이 null/빈 문자열이면 diseaseName 기반 기본 문구가 들어감)
             .filter((item) => !item.riskLevelText.includes("정상"))
             .map((item) => (
               <div
@@ -431,9 +449,14 @@ export default function ReportPage() {
                   </div>
                 </div>
                 <div className="text-sm text-foreground mb-3">
-                  {item.formatExplainAsBullets(item.explainText)}
+                  {item.hasExplain
+                    ? item.formatExplainAsBullets(item.explainText)
+                    : null}
                 </div>
-                <button className="w-full h-10 bg-[#4291F2] text-white rounded-full shadow-none font-medium text-sm hover:bg-[#3182CE] transition-colors">
+                <button
+                  className="w-full h-10 bg-[#4291F2] text-white rounded-full shadow-none font-medium text-sm hover:bg-[#3182CE] transition-colors"
+                  onClick={() => router.push("/consultation")}
+                >
                   상담하러가기
                 </button>
               </div>
@@ -462,7 +485,10 @@ export default function ReportPage() {
             <h3 className="text-lg font-bold text-foreground mb-3 text-center">
               전문가 연결하기
             </h3>
-            <button className="w-full h-12 bg-[#4291F2] text-white rounded-full shadow-none font-medium text-base hover:bg-[#3182CE] transition-colors">
+            <button
+              className="w-full h-12 bg-[#4291F2] text-white rounded-full shadow-none font-medium text-base hover:bg-[#3182CE] transition-colors"
+              onClick={() => router.push("/consultation")}
+            >
               상담하러가기
             </button>
           </div>
