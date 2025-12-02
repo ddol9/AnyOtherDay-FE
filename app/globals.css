@@ -1,40 +1,40 @@
-@import url('https://cdn.jsdelivr.net/gh/spoqa/spoqa-han-sans@latest/Subset/SpoqaHanSansNeo.css');
-@import 'tailwindcss';
-@import 'tw-animate-css';
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700;900&display=swap");
+@import "tailwindcss";
+@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: #EBF2F8;
+  --background: #ebf2f8;
   --foreground: #1f2937;
   --card: #ffffff;
   --card-foreground: #1f2937;
   --popover: #ffffff;
   --popover-foreground: #1f2937;
-  --primary: #4291F2;
+  --primary: #4291f2;
   --primary-foreground: #ffffff;
-  --secondary: #979EA1;
+  --secondary: #979ea1;
   --secondary-foreground: #ffffff;
   --muted: #f3f4f6;
-  --muted-foreground: #979EA1;
-  --accent: #FFD86D;
+  --muted-foreground: #979ea1;
+  --accent: #ffd86d;
   --accent-foreground: #1f2937;
-  --destructive: #FDEEEE;
+  --destructive: #fdeeee;
   --destructive-foreground: #dc2626;
   --border: #e5e7eb;
   --input: #e5e7eb;
-  --ring: #4291F2;
-  --chart-1: #4291F2;
-  --chart-2: #FFD86D;
-  --chart-3: #FDEEEE;
-  --chart-4: #979EA1;
-  --chart-5: #EBF2F8;
+  --ring: #4291f2;
+  --chart-1: #4291f2;
+  --chart-2: #ffd86d;
+  --chart-3: #fdeeee;
+  --chart-4: #979ea1;
+  --chart-5: #ebf2f8;
   --radius: 1.125rem;
 }
 
 @theme inline {
-  --font-sans: 'Spoqa Han Sans Neo', sans-serif;
-  --font-mono: 'Spoqa Han Sans Neo', sans-serif;
+  --font-sans: "Noto Sans KR", sans-serif;
+  --font-mono: "Noto Sans KR", sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
