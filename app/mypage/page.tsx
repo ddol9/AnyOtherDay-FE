@@ -40,7 +40,7 @@ export default function MyPage() {
         const guardianId = 1;
 
         // 보호자의 피보호자 목록 조회
-        const wardsUrl = `${process.env.NEXT_PUBLIC_API_URL}/wards?guardianId=${guardianId}`;
+        const wardsUrl = `/api/v1/wards?guardianId=${guardianId}`;
         console.log("피보호자 목록 조회 URL:", wardsUrl);
 
         const response = await fetch(wardsUrl);
@@ -66,7 +66,9 @@ export default function MyPage() {
           console.error("- 상태 코드:", response.status);
           console.error("- 상태 텍스트:", response.statusText);
           console.error("- 응답 본문:", errorText);
-          setError(`피보호자 목록을 불러올 수 없습니다. (${response.status} ${response.statusText})`);
+          setError(
+            `피보호자 목록을 불러올 수 없습니다. (${response.status} ${response.statusText})`,
+          );
           setWards([]);
         }
       } catch (error) {
@@ -108,7 +110,11 @@ export default function MyPage() {
   );
 
   return (
-    <AppLayout hasHeader={true} headerContent={headerContent} showNavigation={false}>
+    <AppLayout
+      hasHeader={true}
+      headerContent={headerContent}
+      showNavigation={false}
+    >
       <div className="px-6 py-4 space-y-4 max-w-md mx-auto w-full">
         {/* 보호자 정보 */}
         <Card className="bg-white p-5 rounded-md shadow-none border-0">
@@ -151,7 +157,9 @@ export default function MyPage() {
                         </span>
                         {ward.age !== undefined && (
                           <>
-                            <span className="text-xs text-muted-foreground">•</span>
+                            <span className="text-xs text-muted-foreground">
+                              •
+                            </span>
                             <span className="text-xs text-muted-foreground">
                               {ward.age}세
                             </span>
@@ -159,7 +167,9 @@ export default function MyPage() {
                         )}
                         {ward.relationship && (
                           <>
-                            <span className="text-xs text-muted-foreground">•</span>
+                            <span className="text-xs text-muted-foreground">
+                              •
+                            </span>
                             <span className="text-xs text-muted-foreground">
                               {ward.relationship}
                             </span>

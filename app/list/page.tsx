@@ -95,13 +95,10 @@ export default function ListPage() {
       const formDataWithFile = new FormData();
       formDataWithFile.append("file", selectedFile);
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/audio-records/ward/${wardId}`,
-        {
-          method: "POST",
-          body: formDataWithFile,
-        },
-      );
+      const response = await fetch(`/api/v1/audio-records/ward/${wardId}`, {
+        method: "POST",
+        body: formDataWithFile,
+      });
 
       if (!response.ok) {
         throw new Error("Failed to upload audio");

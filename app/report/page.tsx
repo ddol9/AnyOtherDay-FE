@@ -103,7 +103,7 @@ export default function ReportPage() {
           return;
         }
 
-        const reportUrl = `${process.env.NEXT_PUBLIC_API_URL}/reports/record/${storedRecordId}`;
+        const reportUrl = `/api/v1/reports/record/${storedRecordId}`;
         console.log("보고서 조회 URL:", reportUrl);
 
         const response = await fetch(reportUrl);

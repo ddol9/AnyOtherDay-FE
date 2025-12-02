@@ -87,7 +87,7 @@ export default function HomePage() {
     const fetchLatestReport = async () => {
       try {
         console.log("=== 가장 최근 리포트 조회 ===");
-        const reportsUrl = `${process.env.NEXT_PUBLIC_API_URL}/reports/ward/${wardId}`;
+        const reportsUrl = `/api/v1/reports/ward/${wardId}`;
         const response = await fetch(reportsUrl);
 
         if (response.ok) {
@@ -185,7 +185,7 @@ export default function HomePage() {
       const formDataWithFile = new FormData();
       formDataWithFile.append("file", selectedFile);
 
-      const uploadUrl = `${process.env.NEXT_PUBLIC_API_URL}/audio-records/ward/${wardId}`;
+      const uploadUrl = `/api/v1/audio-records/ward/${wardId}`;
       console.log("업로드 URL:", uploadUrl);
       console.log("요청 메서드: POST");
       console.log("요청 본문: FormData (파일)");
@@ -253,7 +253,7 @@ export default function HomePage() {
         attempts++;
         console.log(`\n[폴링 시도 ${attempts}/${maxAttempts}]`);
 
-        const statusUrl = `${process.env.NEXT_PUBLIC_API_URL}/audio-records/${recId}`;
+        const statusUrl = `/api/v1/audio-records/${recId}`;
         console.log("상태 확인 URL:", statusUrl);
 
         const response = await fetch(statusUrl);
@@ -280,7 +280,7 @@ export default function HomePage() {
         if (status === "completed") {
           console.log("상태가 'completed'로 변경됨! 리포트 조회 중...");
 
-          const reportUrl = `${process.env.NEXT_PUBLIC_API_URL}/reports/record/${recId}`;
+          const reportUrl = `/api/v1/reports/record/${recId}`;
           console.log("리포트 조회 URL:", reportUrl);
 
           const reportResponse = await fetch(reportUrl);
